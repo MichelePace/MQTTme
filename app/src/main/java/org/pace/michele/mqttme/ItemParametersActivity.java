@@ -251,7 +251,17 @@ public class ItemParametersActivity extends AppCompatActivity {
 
 
     void showOldSettings(){
-
+        ((EditText)findViewById(R.id.name)).setText(item.getName());
+        ((EditText)findViewById(R.id.subTopic)).setText(item.getSubTopic());
+        ((EditText)findViewById(R.id.pubTopic)).setText(item.getPubTopic());
+        if(item.getQoS() == 0) {
+            ((RadioButton) findViewById(R.id.radio0)).setChecked(true);
+        }else if(item.getQoS() == 1){
+            ((RadioButton) findViewById(R.id.radio1)).setChecked(true);
+        }else if(item.getQoS() == 2){
+            ((RadioButton) findViewById(R.id.radio2)).setChecked(true);
+        }
+        ((CheckBox)findViewById(R.id.retained)).setChecked(item.getRetained());
     }
 
 

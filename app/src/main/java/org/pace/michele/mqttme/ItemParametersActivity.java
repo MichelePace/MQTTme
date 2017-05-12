@@ -32,6 +32,8 @@ public class ItemParametersActivity extends AppCompatActivity {
     final static int UNPRESSED = 11116;
 
     int itemType;
+    int reason;
+
     MyItem newItem = new MyItem();
 
     @Override
@@ -55,7 +57,8 @@ public class ItemParametersActivity extends AppCompatActivity {
         });
 
         Intent intent = getIntent();
-        itemType = intent.getIntExtra("ItemID", -1); //if param ItemID is not found, returns -1
+        reason = intent.getIntExtra("Reason", -1); //if param Reason is not found, returns -1
+        itemType = intent.getIntExtra("Item", -1); //if param Item is not found, returns -1
 
         LinearLayout paramLayout = (LinearLayout) findViewById(R.id.paramLayout);
 
@@ -69,25 +72,55 @@ public class ItemParametersActivity extends AppCompatActivity {
 
         switch(itemType){
             case MyItem.TEXT_ITEM:
-                t.setText("Prefix:");
-                t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                horizontalLayout.addView(t);
 
-                e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
-                e.setId(R.id.prefix);
-                horizontalLayout.addView(e);
+                // If this activity has been called to create new item
+                if(reason == MainActivity.NEW_ITEM) {
 
-                t2.setText("Postfix:");
-                t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                horizontalLayout.addView(t2);
+                    t.setText("Prefix:");
+                    t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t);
 
-                e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
-                e2.setId(R.id.postfix);
-                horizontalLayout.addView(e2);
+                    e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e.setId(R.id.prefix);
+                    horizontalLayout.addView(e);
 
-                paramLayout.addView(horizontalLayout);
+                    t2.setText("Postfix:");
+                    t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t2);
+
+                    e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e2.setId(R.id.postfix);
+                    horizontalLayout.addView(e2);
+
+                    paramLayout.addView(horizontalLayout);
+
+
+                // Else if this activity has been called to modify an item
+                }else if(reason == MainActivity.MODIFY_ITEM){
+
+                    t.setText("Prefix:");
+                    t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t);
+
+                    e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e.setId(R.id.prefix);
+                    horizontalLayout.addView(e);
+
+                    t2.setText("Postfix:");
+                    t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t2);
+
+                    e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e2.setId(R.id.postfix);
+                    horizontalLayout.addView(e2);
+
+                    paramLayout.addView(horizontalLayout);
+                }
+
                 break;
 
             case MyItem.RANGE_ITEM:

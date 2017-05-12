@@ -66,7 +66,11 @@ public class MainActivity extends AppCompatActivity {
     private final String MQTT_USER = "android";
     private final char[] MQTT_PASS = {'a','n','d','r','o','i','d'};
 
+    //Intent contants
+
     static final int PARAMETERS_ACTIVITY = 0;
+    static final int NEW_ITEM = 0;
+    static final int MODIFY_ITEM = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -714,6 +718,7 @@ public class MainActivity extends AppCompatActivity {
      */
     void addItem(int item){
         Intent myIntent = new Intent(MainActivity.this, ItemParametersActivity.class);
+        myIntent.putExtra("Reason", NEW_ITEM);
         myIntent.putExtra("ItemID", item); //Optional parameters, sends thi item type
         MainActivity.this.startActivityForResult(myIntent, PARAMETERS_ACTIVITY);
     }
@@ -858,7 +863,11 @@ public class MainActivity extends AppCompatActivity {
      * @param key
      */
     void modifyItem(int key){
-
+        MyItem item = items.get(key);
+        Intent myIntent = new Intent(MainActivity.this, ItemParametersActivity.class);
+        myIntent.putExtra("Reason", MODIFY_ITEM);
+        myIntent.putExtra("Item", item); //Optional parameters, sends thi item type
+        MainActivity.this.startActivityForResult(myIntent, PARAMETERS_ACTIVITY);
     }
 
 

@@ -167,7 +167,7 @@ public class ItemParametersActivity extends AppCompatActivity {
                 String prefix = ((EditText)findViewById(R.id.prefix)).getText().toString();
                 String postfix = ((EditText)findViewById(R.id.postfix)).getText().toString();
 
-                newItem = new MyItem(name, MyItem.TEXT_ITEM, null, pub, sub, qos, retained, prefix,postfix);
+                newItem = new MyItem(name, MyItem.TEXT_ITEM, pub, sub, qos, retained, prefix,postfix);
                 break;
 
             case MyItem.RANGE_ITEM:
@@ -181,7 +181,7 @@ public class ItemParametersActivity extends AppCompatActivity {
                 int min = Integer.parseInt(((EditText)findViewById(R.id.min)).getText().toString());
                 int max = Integer.parseInt(((EditText)findViewById(R.id.max)).getText().toString());
 
-                newItem = new MyItem(name, MyItem.RANGE_ITEM, null, pub, sub, qos, retained, min, max);
+                newItem = new MyItem(name, MyItem.RANGE_ITEM, pub, sub, qos, retained, min, max);
                 break;
 
             case MyItem.TOGGLE_ITEM:
@@ -195,7 +195,7 @@ public class ItemParametersActivity extends AppCompatActivity {
                 String pressed = ((EditText)findViewById(R.id.pressed)).getText().toString();
                 String unpressed = ((EditText)findViewById(R.id.unpressed)).getText().toString();
 
-                newItem = new MyItem(name, MyItem.TOGGLE_ITEM, null, pub, sub, qos, retained, false, pressed, unpressed);
+                newItem = new MyItem(name, MyItem.TOGGLE_ITEM, pub, sub, qos, retained, false, pressed, unpressed);
                 break;
         }
 

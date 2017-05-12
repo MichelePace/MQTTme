@@ -19,7 +19,6 @@ public class MyItem implements Serializable{
 
     private String name;
     private int type;
-    private View item;
     private String pubTopic;
     private String subTopic;
     private int QoS;
@@ -35,10 +34,9 @@ public class MyItem implements Serializable{
 
     MyItem (){}
 
-    MyItem(String n, int t, View v, String pub, String sub, int q, boolean r, String pre, String post){
+    MyItem(String n, int t, String pub, String sub, int q, boolean r, String pre, String post){
         name = n;
         type = t;
-        item = v;
         pubTopic = pub;
         subTopic = sub;
         QoS = q;
@@ -47,10 +45,9 @@ public class MyItem implements Serializable{
         postfix = post;
     }
 
-    MyItem(String n, int t, View v, String pub, String sub,int q, boolean r, boolean s, String press, String unpress){
+    MyItem(String n, int t, String pub, String sub,int q, boolean r, boolean s, String press, String unpress){
         name = n;
         type = t;
-        item = v;
         pubTopic = pub;
         subTopic = sub;
         QoS = q;
@@ -60,10 +57,9 @@ public class MyItem implements Serializable{
         unpressed = unpress;
     }
 
-    MyItem(String n, int t, View v, String pub, String sub, int q, boolean r, int min, int max){
+    MyItem(String n, int t, String pub, String sub, int q, boolean r, int min, int max){
         name = n;
         type = t;
-        item = v;
         pubTopic = pub;
         subTopic = sub;
         QoS = q;
@@ -78,10 +74,6 @@ public class MyItem implements Serializable{
 
     void setType(int t){
         type = t;
-    }
-
-    void setItem(View v){
-        item = v;
     }
 
     void setPubTopic(String pub){
@@ -134,10 +126,6 @@ public class MyItem implements Serializable{
 
     int getType(){
         return type;
-    }
-
-    View getItem(){
-        return item;
     }
 
     String getPubTopic(){

@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
+    Hashtable<Integer, View> itemsView = new Hashtable<Integer, View>();
 
     EditText messageToSend;
 
@@ -124,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         initializeMQTT();
         mqtt_connect();
 
-        itemStatus = new File(this.getFilesDir() + path);
+        /*itemStatus = new File(this.getFilesDir() + path);
 
         if(itemStatus.exists() && itemStatus.canRead()) {
 
@@ -144,9 +145,8 @@ public class MainActivity extends AppCompatActivity {
             }
             System.out.println("ssssss++++++++++++++++++++++++ "+items.size());
         }else{
-            System.out.println("+++++++++++++++++++++++++++++++++++File not exists");
-        }
-
+            System.out.println("+++++++++++++++++File not exists");
+        }*/
 
 
         // Initialize layout
@@ -516,7 +516,7 @@ public class MainActivity extends AppCompatActivity {
      */
     void seekBarProgressChanged(int key, int progress){
         if(items.size() > key) {
-            View item = items.get(key).getItem();
+            View item = itemsView.get(key);
             TextView tv = (TextView) item.findViewById(R.id.progress);
             tv.setText(""+progress);
         }
@@ -548,7 +548,7 @@ public class MainActivity extends AppCompatActivity {
         boolean retained = mi.getRetained();
         int qos = mi.getQoS();
 
-        View item = mi.getItem();
+        View item = itemsView.get(key);
         SeekBar sb = (SeekBar) item.findViewById(R.id.seekBar);
         String message = String.valueOf(sb.getProgress());
 
@@ -657,7 +657,7 @@ public class MainActivity extends AppCompatActivity {
         boolean retained = mi.getRetained();
         int qos = mi.getQoS();
 
-        View item = mi.getItem();
+        View item = itemsView.get(key);
         TextView t = (TextView) item.findViewById(R.id.message);
         String message = String.valueOf(messageToSend.getText());
         t.setText(message);
@@ -856,7 +856,7 @@ public class MainActivity extends AppCompatActivity {
                 rightColumn.addView(item);
             }
 
-            mi.setItem(item);
+            itemsView.put(key, item);
             items.put(key, mi);
         }
 
@@ -879,6 +879,11 @@ public class MainActivity extends AppCompatActivity {
         return baos.toByteArray().length;
     }
 
+    /**
+     *
+     * @param obj
+     * @return
+     */
     byte[] getObjectByteArray(MyItem obj){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -890,6 +895,11 @@ public class MainActivity extends AppCompatActivity {
         return baos.toByteArray();
     }
 
+    /**
+     *
+     * @param obj
+     * @return
+     */
     byte[] getObjectByteArray(Hashtable obj){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -903,7 +913,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     void salva() {
-        itemStatus = new File(this.getFilesDir() + path);
+        /*itemStatus = new File(this.getFilesDir() + path);
         try {
             FileOutputStream file= new FileOutputStream(itemStatus);
             ObjectOutputStream out = new ObjectOutputStream(file);
@@ -914,7 +924,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
 
@@ -922,7 +932,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStop(){
         super.onStop();
 
-        itemStatus = new File(this.getFilesDir() + path);
+        /*itemStatus = new File(this.getFilesDir() + path);
         Enumeration e = items.keys();
         int k;
         try {
@@ -944,7 +954,7 @@ public class MainActivity extends AppCompatActivity {
             ex.printStackTrace();
         } catch (IOException e1) {
             e1.printStackTrace();
-        }
+        }*/
 
     }
 

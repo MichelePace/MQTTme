@@ -33,6 +33,7 @@ public class ItemParametersActivity extends AppCompatActivity {
 
     int itemType;
     int reason;
+    MyItem item;
 
     MyItem newItem = new MyItem();
 
@@ -58,7 +59,8 @@ public class ItemParametersActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         reason = intent.getIntExtra("Reason", -1); //if param Reason is not found, returns -1
-        itemType = intent.getIntExtra("Item", -1); //if param Item is not found, returns -1
+        itemType = intent.getIntExtra("ItemID", -1); //if param ItemID is not found, returns -1
+        item = (MyItem) intent.getSerializableExtra("Item");
 
         LinearLayout paramLayout = (LinearLayout) findViewById(R.id.paramLayout);
 
@@ -107,6 +109,7 @@ public class ItemParametersActivity extends AppCompatActivity {
                     e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
                     e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
                     e.setId(R.id.prefix);
+                    e.setText(item.getPrefix());
                     horizontalLayout.addView(e);
 
                     t2.setText("Postfix:");
@@ -116,6 +119,7 @@ public class ItemParametersActivity extends AppCompatActivity {
                     e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
                     e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
                     e2.setId(R.id.postfix);
+                    e2.setText(item.getPostfix());
                     horizontalLayout.addView(e2);
 
                     paramLayout.addView(horizontalLayout);

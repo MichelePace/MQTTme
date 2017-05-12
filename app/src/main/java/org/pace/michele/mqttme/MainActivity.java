@@ -67,8 +67,6 @@ public class MainActivity extends AppCompatActivity {
     private final char[] MQTT_PASS = {'a','n','d','r','o','i','d'};
 
     //Intent contants
-
-    static final int PARAMETERS_ACTIVITY = 0;
     static final int NEW_ITEM = 0;
     static final int MODIFY_ITEM = 1;
 
@@ -204,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
         //if(requestCode != PARAMETERS_ACTIVITY) {
 
             switch (requestCode) {
-                case (PARAMETERS_ACTIVITY): {
+                case (NEW_ITEM): {
                     if (resultCode == ItemParametersActivity.RESULT_OK) {
                         MyItem newItem = (MyItem) data.getSerializableExtra("newItem");
                         createNewItem(newItem);
@@ -215,6 +213,10 @@ public class MainActivity extends AppCompatActivity {
                                 .setAction("Action", null).show();
                     }
                     break;
+
+                }
+
+                case (MODIFY_ITEM): {
 
                 }
 
@@ -720,7 +722,7 @@ public class MainActivity extends AppCompatActivity {
         Intent myIntent = new Intent(MainActivity.this, ItemParametersActivity.class);
         myIntent.putExtra("Reason", NEW_ITEM);
         myIntent.putExtra("ItemID", item); //Optional parameters, sends thi item type
-        MainActivity.this.startActivityForResult(myIntent, PARAMETERS_ACTIVITY);
+        MainActivity.this.startActivityForResult(myIntent, NEW_ITEM);
     }
 
     /**
@@ -865,9 +867,12 @@ public class MainActivity extends AppCompatActivity {
     void modifyItem(int key){
         MyItem item = items.get(key);
         Intent myIntent = new Intent(MainActivity.this, ItemParametersActivity.class);
+
+        //Optional parameters
         myIntent.putExtra("Reason", MODIFY_ITEM);
-        myIntent.putExtra("Item", item); //Optional parameters, sends thi item type
-        MainActivity.this.startActivityForResult(myIntent, PARAMETERS_ACTIVITY);
+        myIntent.putExtra("Item", item);
+        myIntent.putExtra("ItemID", item.getType());
+        MainActivity.this.startActivityForResult(myIntent, MODIFY_ITEM);
     }
 
 

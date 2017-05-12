@@ -213,16 +213,12 @@ public class MainActivity extends AppCompatActivity {
                                 .setAction("Action", null).show();
                     }
                     break;
-
                 }
 
                 case (MODIFY_ITEM): {
 
-                }
-
-                default:
-                    System.out.println("DEFAULT IN SWITCH");
                     break;
+                }
             }
         //}
     }

@@ -44,7 +44,7 @@ import org.eclipse.paho.client.mqttv3.*;
 
 public class MainActivity extends AppCompatActivity {
 
-    File itemStatus;
+    File file;
     final String path = "/itemStatus";
 
 
@@ -295,14 +295,14 @@ public class MainActivity extends AppCompatActivity {
      */
     void initialize(){
 
-        itemStatus = new File(this.getFilesDir() + path);
+        file = new File(this.getFilesDir() + path);
 
-        if(itemStatus.exists() && itemStatus.canRead()) {
+        if(file.exists() && file.canRead()) {
 
-            itemStatus = new File(this.getFilesDir() + path);
+            file = new File(this.getFilesDir() + path);
             try {
-                FileInputStream file=new FileInputStream(itemStatus);
-                ObjectInputStream in = new ObjectInputStream(file);
+                FileInputStream input = new FileInputStream(file);
+                ObjectInputStream in = new ObjectInputStream(input);
                 Object obj=in.readObject();
                 items=(Hashtable<Integer, MyItem>) obj;
                 in.close();

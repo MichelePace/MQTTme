@@ -663,7 +663,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param key
      */
-    void longClickText(int key){
+    void longClickText(final int key){
         final Dialog d = new Dialog(MainActivity.this);
         d.setContentView(R.layout.long_press_dialog);
         d.setCancelable(true);
@@ -677,7 +677,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //modifyItem(key);
+                modifyItem(key);
                 d.dismiss();
             }
         });
@@ -687,7 +687,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //deleteItem(key);
+                deleteItem(key);
                 d.dismiss();
             }
         });
@@ -697,7 +697,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //duplicateItem(prt);
+                duplicateItem(key);
                 d.dismiss();
             }
         });
@@ -851,6 +851,35 @@ public class MainActivity extends AppCompatActivity {
 
         totalItems++;
     }
+
+
+    /**
+     *
+     * @param key
+     */
+    void modifyItem(int key){
+
+    }
+
+
+    /**
+     *
+     * @param key
+     */
+    void deleteItem(int key){
+
+    }
+
+
+    /**
+     *
+     * @param key
+     */
+    void duplicateItem(int key){
+
+    }
+
+
 
     /**
      *

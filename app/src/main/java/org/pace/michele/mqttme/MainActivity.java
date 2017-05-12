@@ -199,41 +199,38 @@ public class MainActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        //if(requestCode != PARAMETERS_ACTIVITY) {
-
-            switch (requestCode) {
-                case (NEW_ITEM): {
-                    if (resultCode == ItemParametersActivity.RESULT_OK) {
-                        MyItem newItem = (MyItem) data.getSerializableExtra("newItem");
-                        createNewItem(newItem);
-                    } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
-                        System.out.println("User pressed back button");
-                    } else {
-                        Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    }
-                    break;
+        switch (requestCode) {
+            case (NEW_ITEM): {
+                if (resultCode == ItemParametersActivity.RESULT_OK) {
+                    MyItem newItem = (MyItem) data.getSerializableExtra("Item");
+                    createNewItem(newItem);
+                } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
+                    System.out.println("User pressed back button");
+                } else {
+                    Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 }
-
-                case (MODIFY_ITEM): {
-                    if (resultCode == ItemParametersActivity.RESULT_OK) {
-
-                        MyItem item = (MyItem) data.getSerializableExtra("Item");
-                        int key = data.getIntExtra("Key", -1);
-
-                        ((TextView)itemsView.get(key).findViewById(R.id.name)).setText(item.getName());//Modify the item name in the view
-                        items.put(key, item);//Replace the modified item
-
-                    } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
-                        System.out.println("User pressed back button");
-                    } else {
-                        Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    }
-                    break;
-                }
+                break;
             }
-        //}
+
+            case (MODIFY_ITEM): {
+                if (resultCode == ItemParametersActivity.RESULT_OK) {
+
+                    MyItem item = (MyItem) data.getSerializableExtra("Item");
+                    int key = data.getIntExtra("Key", -1);
+
+                    ((TextView)itemsView.get(key).findViewById(R.id.name)).setText(item.getName());//Modify the item name in the view
+                    items.put(key, item);//Replace the modified item
+
+                } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
+                    System.out.println("User pressed back button");
+                } else {
+                    Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+                break;
+            }
+        }
     }
 
 

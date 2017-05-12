@@ -65,6 +65,7 @@ public class ItemParametersActivity extends AppCompatActivity {
         if(reason == MainActivity.MODIFY_ITEM) {
             item = (MyItem) intent.getSerializableExtra("Item");
             key = intent.getIntExtra("Key", -1);
+            showOldSettings();
         }
 
         LinearLayout paramLayout = (LinearLayout) findViewById(R.id.paramLayout);
@@ -133,57 +134,123 @@ public class ItemParametersActivity extends AppCompatActivity {
                 break;
 
             case MyItem.RANGE_ITEM:
-                t.setText("Min:");
-                t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                horizontalLayout.addView(t);
 
-                e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
-                e.setText("0");
-                e.setId(R.id.min);
-                horizontalLayout.addView(e);
+                // If this activity has been called to create new item
+                if(reason == MainActivity.NEW_ITEM) {
 
-                t2.setText("Max:");
-                t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                horizontalLayout.addView(t2);
+                    t.setText("Min:");
+                    t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t);
 
-                e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
-                e2.setText("100");
-                e2.setId(R.id.max);
-                horizontalLayout.addView(e2);
+                    e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e.setText("0");
+                    e.setId(R.id.min);
+                    horizontalLayout.addView(e);
 
-                paramLayout.addView(horizontalLayout);
+                    t2.setText("Max:");
+                    t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t2);
+
+                    e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e2.setText("100");
+                    e2.setId(R.id.max);
+                    horizontalLayout.addView(e2);
+
+                    paramLayout.addView(horizontalLayout);
+
+                // Else if this activity has been called to modify an item
+                }else if(reason == MainActivity.MODIFY_ITEM){
+
+                    t.setText("Min:");
+                    t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t);
+
+                    e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e.setText(item.getMin());
+                    e.setId(R.id.min);
+                    horizontalLayout.addView(e);
+
+                    t2.setText("Max:");
+                    t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t2);
+
+                    e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e2.setText(item.getMax());
+                    e2.setId(R.id.max);
+                    horizontalLayout.addView(e2);
+
+                    paramLayout.addView(horizontalLayout);
+                }
+
                 break;
 
             case MyItem.TOGGLE_ITEM:
-                t.setText("Pressed:");
-                t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                horizontalLayout.addView(t);
 
-                e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
-                e.setText("on");
-                e.setId(R.id.pressed);
-                horizontalLayout.addView(e);
+                // If this activity has been called to create new item
+                if(reason == MainActivity.NEW_ITEM) {
 
-                t2.setText("Unpressed:");
-                t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                horizontalLayout.addView(t2);
+                    t.setText("Pressed:");
+                    t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t);
 
-                e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
-                e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
-                e2.setText("off");
-                e2.setId(R.id.unpressed);
-                horizontalLayout.addView(e2);
+                    e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e.setText("on");
+                    e.setId(R.id.pressed);
+                    horizontalLayout.addView(e);
 
-                paramLayout.addView(horizontalLayout);
+                    t2.setText("Unpressed:");
+                    t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t2);
+
+                    e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e2.setText("off");
+                    e2.setId(R.id.unpressed);
+                    horizontalLayout.addView(e2);
+
+                    paramLayout.addView(horizontalLayout);
+
+                // Else if this activity has been called to modify an item
+                }else if(reason == MainActivity.MODIFY_ITEM){
+                    t.setText("Pressed:");
+                    t.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t);
+
+                    e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e.setText(item.getPressed());
+                    e.setId(R.id.pressed);
+                    horizontalLayout.addView(e);
+
+                    t2.setText("Unpressed:");
+                    t2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    horizontalLayout.addView(t2);
+
+                    e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
+                    e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
+                    e2.setText(item.getUnpressed());
+                    e2.setId(R.id.unpressed);
+                    horizontalLayout.addView(e2);
+
+                    paramLayout.addView(horizontalLayout);
+                }
+
                 break;
 
             default:
                 finish();
                 break;
         }
+
+    }
+
+
+    void showOldSettings(){
 
     }
 
@@ -242,7 +309,8 @@ public class ItemParametersActivity extends AppCompatActivity {
         }
 
         Intent resultIntent = new Intent();
-        resultIntent.putExtra("newItem", newItem);
+        resultIntent.putExtra("Item", newItem);
+        resultIntent.putExtra("Key", key);
         setResult(RESULT_OK, resultIntent);
         finish();
     }

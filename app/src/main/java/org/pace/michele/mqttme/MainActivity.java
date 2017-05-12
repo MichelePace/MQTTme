@@ -318,15 +318,12 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("File not exists");
         }
 
-
-        /*int number = 3;*/
+        int number = items.size();
 
         LinearLayout leftColumn = (LinearLayout) findViewById(R.id.left_column);
         LinearLayout rightColumn = (LinearLayout) findViewById(R.id.right_column);
 
         int itemDimension = leftColumn.getWidth();
-
-        initialized = true;
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(itemDimension, itemDimension);
         params.setMargins(0,0,0,5);
@@ -423,6 +420,8 @@ public class MainActivity extends AppCompatActivity {
                 items.add(mi);
             }
         }*/
+
+        initialized = true;
     }
 
 

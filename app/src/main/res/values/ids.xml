@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="prefix" type="id">11111</item>
+    <item name="postfix" type="id">11112</item>
+    <item name="min" type="id">11113</item>
+    <item name="max" type="id">11114</item>
+    <item name="pressed" type="id">11115</item>
+    <item name="unpressed" type="id">11116</item>
+</resources>

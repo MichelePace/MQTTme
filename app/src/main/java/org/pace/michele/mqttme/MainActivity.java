@@ -320,7 +320,6 @@ public class MainActivity extends AppCompatActivity {
                 in.close();
                 for(int i=0;i<itemi.size();i++)
                 {
-                    System.out.println("nameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee "+itemi.get(i).getName());
                     createNewItem(itemi.get(i));
                 }
             } catch (FileNotFoundException e) {
@@ -330,112 +329,7 @@ public class MainActivity extends AppCompatActivity {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        }else{
-            System.out.println("File not exists");
         }
-
-        int number = items.size();
-
-        LinearLayout leftColumn = (LinearLayout) findViewById(R.id.left_column);
-        LinearLayout rightColumn = (LinearLayout) findViewById(R.id.right_column);
-
-        int itemDimension = leftColumn.getWidth();
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(itemDimension, itemDimension);
-        params.setMargins(0,0,0,5);
-
-        LayoutInflater inflater_one_user = MainActivity.this.getLayoutInflater();
-        View item = null;
-
-        /*for(int i = 0; i < number; i++){
-
-            final int key = i;
-
-            //IF TOGGLE_ITEM
-            if(MyItem.TOGGLE_ITEM == 2) {
-                item = inflater_one_user.inflate(R.layout.toggle_item, null);
-                TextView itemName = (TextView) item.findViewById(R.id.name);
-
-                itemName.setText("PROVA" + i);
-                item.setLayoutParams(params);
-
-                ToggleButton tb = (ToggleButton) item.findViewById(R.id.toggleButton);
-                tb.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        togglePressed(key);
-                    }
-                });
-
-            }else if(MyItem.RANGE_ITEM == 1){
-
-                //IF RANGE_ITEM
-                item = inflater_one_user.inflate(R.layout.range_item, null);
-                TextView itemName = (TextView) item.findViewById(R.id.name);
-
-                itemName.setText("PROVA" + i);
-                item.setLayoutParams(params);
-
-                SeekBar sb = ((SeekBar) item.findViewById(R.id.seekBar));
-                sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        seekBarProgressChanged(key, progress);
-                    }
-
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                        seekBarStartTracking(key);
-                    }
-
-                    public void onStokeyackingTouch(SeekBar seekBar) {
-                        seekBarStokeyacking(key);
-                    }
-                });
-
-                item.findViewById(R.id.set).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        buttonSetClicked(key);
-                    }
-                });
-
-            }else if(MyItem.TEXT_ITEM == 2){
-
-                //IF TEXT_ITEM
-                item = inflater_one_user.inflate(R.layout.text_item, null);
-                TextView itemName = (TextView) item.findViewById(R.id.name);
-                TextView message = (TextView) item.findViewById(R.id.message);
-
-                itemName.setText("PROVA" + i);
-                item.setLayoutParams(params);
-
-                item.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        messageClicked(key);
-                    }
-                });
-
-                message.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        messageClicked(key);
-                    }
-                });
-
-            }
-
-            if(item != null) {
-                if (i % 2 == 0) {
-                    leftColumn.addView(item);
-                } else {
-                    rightColumn.addView(item);
-                }
-
-                MyItem mi = new MyItem("", MyItem.RANGE_ITEM, item, "", "",0,true,"","");
-                items.add(mi);
-            }
-        }*/
 
         initialized = true;
     }
@@ -527,6 +421,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     /**
      *
      * @param key
@@ -535,6 +430,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
     /**
      *
      * @param key
@@ -542,6 +438,7 @@ public class MainActivity extends AppCompatActivity {
     void seekBarStokeyacking(int key){
 
     }
+
 
     /**
      *
@@ -565,6 +462,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
 
     /**
      *
@@ -652,6 +550,7 @@ public class MainActivity extends AppCompatActivity {
         imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
     }
 
+
     /**
      *
      * @param key
@@ -674,6 +573,7 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
 
     /**
      *
@@ -734,6 +634,7 @@ public class MainActivity extends AppCompatActivity {
         myIntent.putExtra("ItemID", item); //Optional parameters, sends thi item type
         MainActivity.this.startActivityForResult(myIntent, NEW_ITEM);
     }
+
 
     /**
      *

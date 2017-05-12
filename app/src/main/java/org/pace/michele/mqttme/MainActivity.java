@@ -216,7 +216,20 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 case (MODIFY_ITEM): {
+                    if (resultCode == ItemParametersActivity.RESULT_OK) {
 
+                        MyItem item = (MyItem) data.getSerializableExtra("Item");
+                        int key = data.getIntExtra("Key", -1);
+
+                        ((TextView)itemsView.get(key).findViewById(R.id.name)).setText(item.getName());//Modify the item name in the view
+                        items.put(key, item);//Replace the modified item
+
+                    } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
+                        System.out.println("User pressed back button");
+                    } else {
+                        Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
                     break;
                 }
             }
@@ -867,6 +880,7 @@ public class MainActivity extends AppCompatActivity {
         //Optional parameters
         myIntent.putExtra("Reason", MODIFY_ITEM);
         myIntent.putExtra("Item", item);
+        myIntent.putExtra("Key", key);
         myIntent.putExtra("ItemID", item.getType());
         MainActivity.this.startActivityForResult(myIntent, MODIFY_ITEM);
     }

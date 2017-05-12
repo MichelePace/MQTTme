@@ -33,6 +33,7 @@ public class ItemParametersActivity extends AppCompatActivity {
 
     int itemType;
     int reason;
+    int key;
     MyItem item;
 
     MyItem newItem = new MyItem();
@@ -60,7 +61,11 @@ public class ItemParametersActivity extends AppCompatActivity {
         Intent intent = getIntent();
         reason = intent.getIntExtra("Reason", -1); //if param Reason is not found, returns -1
         itemType = intent.getIntExtra("ItemID", -1); //if param ItemID is not found, returns -1
-        item = (MyItem) intent.getSerializableExtra("Item");
+
+        if(reason == MainActivity.MODIFY_ITEM) {
+            item = (MyItem) intent.getSerializableExtra("Item");
+            key = intent.getIntExtra("Key", -1);
+        }
 
         LinearLayout paramLayout = (LinearLayout) findViewById(R.id.paramLayout);
 

@@ -454,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param key
      */
-    void longClickToggle(int key){
+    void longClickToggle(final int key){
         final Dialog d = new Dialog(MainActivity.this);
         d.setContentView(R.layout.long_press_dialog);
         d.setCancelable(true);
@@ -468,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //modifyItem(key);
+                modifyItem(key);
                 d.dismiss();
             }
         });
@@ -478,7 +478,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //deleteItem(key);
+                deleteItem(key);
                 d.dismiss();
             }
         });
@@ -488,7 +488,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //duplicateItem(prt);
+                duplicateItem(key);
                 d.dismiss();
             }
         });
@@ -554,7 +554,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param key
      */
-    void longClickRange(int key){
+    void longClickRange(final int key){
         final Dialog d = new Dialog(MainActivity.this);
         d.setContentView(R.layout.long_press_dialog);
         d.setCancelable(true);
@@ -568,7 +568,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //modifyItem(key);
+                modifyItem(key);
                 d.dismiss();
             }
         });
@@ -578,7 +578,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //deleteItem(key);
+                deleteItem(key);
                 d.dismiss();
             }
         });
@@ -588,7 +588,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                //duplicateItem(prt);
+                duplicateItem(key);
                 d.dismiss();
             }
         });

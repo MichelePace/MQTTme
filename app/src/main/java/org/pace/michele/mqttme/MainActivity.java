@@ -316,8 +316,13 @@ public class MainActivity extends AppCompatActivity {
                 FileInputStream input = new FileInputStream(file);
                 ObjectInputStream in = new ObjectInputStream(input);
                 Object obj=in.readObject();
-                items=(Hashtable<Integer, MyItem>) obj;
+                Hashtable<Integer, MyItem> itemi=(Hashtable<Integer, MyItem>) obj;
                 in.close();
+                for(int i=0;i<itemi.size();i++)
+                {
+                    System.out.println("nameeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee "+itemi.get(i).getName());
+                    createNewItem(itemi.get(i));
+                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -325,7 +330,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            System.out.println("+++++++++++++++++++ "+items.size());
         }else{
             System.out.println("File not exists");
         }
@@ -970,31 +974,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop(){
         super.onStop();
-
-        /*itemStatus = new File(this.getFilesDir() + path);
-        Enumeration e = items.keys();
-        int k;
+        file = new File(this.getFilesDir() + path);
         try {
-            FileOutputStream file = new FileOutputStream(itemStatus);
-            ObjectOutputStream out = new ObjectOutputStream(file);
-
-            while (e.hasMoreElements()){
-
-                k = (int)e.nextElement();
-                out.writeObject(items.get(k));
-                System.out.println("Scritto bene++++++++++++++++++++++++++++++++++++++++++++++");
-
-            }
-
+            FileOutputStream output= new FileOutputStream(file);
+            ObjectOutputStream out = new ObjectOutputStream(output);
+            out.writeObject(items);
             out.flush();
             out.close();
-
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }*/
-
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

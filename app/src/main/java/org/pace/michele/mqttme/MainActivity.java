@@ -125,30 +125,6 @@ public class MainActivity extends AppCompatActivity {
         initializeMQTT();
         mqtt_connect();
 
-        /*itemStatus = new File(this.getFilesDir() + path);
-
-        if(itemStatus.exists() && itemStatus.canRead()) {
-
-            itemStatus = new File(this.getFilesDir() + path);
-            try {
-                FileInputStream file=new FileInputStream(itemStatus);
-                ObjectInputStream in = new ObjectInputStream(file);
-                Object obj=in.readObject();
-                items=(Hashtable<Integer, MyItem>) obj;
-                in.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            System.out.println("ssssss++++++++++++++++++++++++ "+items.size());
-        }else{
-            System.out.println("+++++++++++++++++File not exists");
-        }*/
-
-
         // Initialize layout
         LinearLayout column = (LinearLayout) findViewById(R.id.left_column);
 
@@ -319,6 +295,30 @@ public class MainActivity extends AppCompatActivity {
      */
     void initialize(){
 
+        itemStatus = new File(this.getFilesDir() + path);
+
+        if(itemStatus.exists() && itemStatus.canRead()) {
+
+            itemStatus = new File(this.getFilesDir() + path);
+            try {
+                FileInputStream file=new FileInputStream(itemStatus);
+                ObjectInputStream in = new ObjectInputStream(file);
+                Object obj=in.readObject();
+                items=(Hashtable<Integer, MyItem>) obj;
+                in.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            System.out.println("+++++++++++++++++++ "+items.size());
+        }else{
+            System.out.println("File not exists");
+        }
+
+
         /*int number = 3;*/
 
         LinearLayout leftColumn = (LinearLayout) findViewById(R.id.left_column);
@@ -327,16 +327,6 @@ public class MainActivity extends AppCompatActivity {
         int itemDimension = leftColumn.getWidth();
 
         initialized = true;
-
-        Button b = new Button(this);
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                salva();
-            }
-        });
-
-        leftColumn.addView(b);
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(itemDimension, itemDimension);
         params.setMargins(0,0,0,5);

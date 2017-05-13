@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
     private MqttAndroidClient client;
     MqttConnectOptions option;
     Connection settings;
-    private final char[] MQTT_PASS = {'a','n','d','r','o','i','d'};
     //Intent contants
     static final int NEW_ITEM = 0;
     static final int MODIFY_ITEM = 1;
@@ -253,7 +252,6 @@ public class MainActivity extends AppCompatActivity {
 
             case (SETTINGS):
                 if (resultCode == ItemParametersActivity.RESULT_OK) {
-
                     settings = (Connection) data.getSerializableExtra("Connection");
                     initializeMQTT();
                     mqtt_connect();

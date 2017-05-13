@@ -44,6 +44,8 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.pace.michele.mqttme.MyItem;
 import org.eclipse.paho.client.mqttv3.*;
 
+import static android.R.attr.type;
+
 public class MainActivity extends AppCompatActivity {
 
     File file;
@@ -668,21 +670,7 @@ public class MainActivity extends AppCompatActivity {
             itemName.setText(mi.getName());
             item.setLayoutParams(params);
 
-            ToggleButton tb = (ToggleButton) item.findViewById(R.id.toggleButton);
-            tb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    togglePressed(key, isChecked);
-                }
-            });
-
-            item.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    longClickToggle(key);
-                    return false;
-                }
-            });
+            setListeners(item,key,mi);
 
         }else if(type == MyItem.RANGE_ITEM){
 
@@ -693,37 +681,7 @@ public class MainActivity extends AppCompatActivity {
             itemName.setText(mi.getName());
             item.setLayoutParams(params);
 
-            SeekBar sb = ((SeekBar) item.findViewById(R.id.seekBar));
-            sb.setMax(mi.getMax() - mi.getMin());
-            sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    seekBarProgressChanged(key, progress);
-                }
-
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                    seekBarStartTracking(key);
-                }
-
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    seekBarStokeyacking(key);
-                }
-            });
-
-            item.findViewById(R.id.set).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    buttonSetClicked(key);
-                }
-            });
-
-            item.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    longClickRange(key);
-                    return false;
-                }
-            });
+            setListeners(item,key,mi);
 
         }else if(type == MyItem.TEXT_ITEM){
 
@@ -734,28 +692,7 @@ public class MainActivity extends AppCompatActivity {
 
             itemName.setText(mi.getName());
             item.setLayoutParams(params);
-
-            item.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    messageClicked(key);
-                }
-            });
-
-            message.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    messageClicked(key);
-                }
-            });
-
-            item.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    longClickText(key);
-                    return false;
-                }
-            });
+            setListeners(item,key,mi);
         }
 
         if(item != null) {
@@ -772,6 +709,88 @@ public class MainActivity extends AppCompatActivity {
         totalItems++;
     }
 
+    void setListeners(View item, int key, MyItem mi)
+    {
+        final int listenKey=key;
+        switch (mi.getType())
+        {
+            case MyItem.TEXT_ITEM:
+                TextView message = (TextView) item.findViewById(R.id.message);
+
+                item.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        messageClicked(listenKey);
+                    }
+                });
+
+                message.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        messageClicked(listenKey);
+                    }
+                });
+
+                item.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        longClickText(listenKey);
+                        return false;
+                    }
+                });
+                break;
+            case MyItem.RANGE_ITEM:
+                SeekBar sb = ((SeekBar) item.findViewById(R.id.seekBar));
+                sb.setMax(mi.getMax() - mi.getMin());
+                sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        seekBarProgressChanged(listenKey, progress);
+                    }
+
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        seekBarStartTracking(listenKey);
+                    }
+
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        seekBarStokeyacking(listenKey);
+                    }
+                });
+
+                item.findViewById(R.id.set).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        buttonSetClicked(listenKey);
+                    }
+                });
+
+                item.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        longClickRange(listenKey);
+                        return false;
+                    }
+                });
+                break;
+            case MyItem.TOGGLE_ITEM:
+                ToggleButton tb = (ToggleButton) item.findViewById(R.id.toggleButton);
+                tb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        togglePressed(listenKey, isChecked);
+                    }
+                });
+
+                item.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        longClickToggle(listenKey);
+                        return false;
+                    }
+                });
+                break;
+        }
+    }
 
     /**
      *
@@ -804,22 +823,22 @@ public class MainActivity extends AppCompatActivity {
         }
         items.remove(key);
         itemsView.remove(key);
-        MyItem item=null; View v=null;
+        MyItem mi=null; View item=null;
         if(key<totalItems)
         {
             for(int i=key+1;i<totalItems;i++)
             {
-                item=items.get(i);v=itemsView.get(i);
+                mi=items.get(i);item=itemsView.get(i);
                 items.remove(i);itemsView.remove(i);
-                items.put(key,item);itemsView.put(key,v);
-                if (key % 2 == 0) {
-                    rightColumn.removeView(v);
-                    leftColumn.addView(v);
+                setListeners(item,i-1,mi);
+                items.put(i-1,mi);itemsView.put(i-1,item);
+                if ((i-1) % 2 == 0) {
+                    rightColumn.removeView(item);
+                    leftColumn.addView(item);
                 } else {
-                    leftColumn.removeView(v);
-                    rightColumn.addView(v);
+                    leftColumn.removeView(item);
+                    rightColumn.addView(item);
                 }
-                key++;
             }
         }
         totalItems--;

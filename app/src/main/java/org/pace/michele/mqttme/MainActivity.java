@@ -2,7 +2,6 @@ package org.pace.michele.mqttme;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,7 +10,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -66,15 +64,15 @@ public class MainActivity extends AppCompatActivity {
     private int totalItems = 0;
 
     /* MQTT parameters
-    public static final String BROKER_URL = "tcp://m21.cloudmqtt.com:12721";
-    private final String clientId = "f803h2famjisdsv8pub";
-    private final String MQTT_USER = "android";
-    private final char[] MQTT_PASS = {'a','n','d','r','o','i','d'};*/
-
+    BROKER_URL = "tcp://m21.cloudmqtt.com:12721";
+    clientId = "f803h2famjisdsv8pub";
+    MQTT_USER = "android";
+    MQTT_PASS = {'a','n','d','r','o','i','d'};*/
 
     private MqttAndroidClient client;
     MqttConnectOptions option;
     Connection settings;
+
     //Intent contants
     static final int NEW_ITEM = 0;
     static final int MODIFY_ITEM = 1;
@@ -497,6 +495,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param key
      */
+
     void buttonSetClicked(int key){
         MyItem mi = items.get(key);
         String topic = mi.getPubTopic();

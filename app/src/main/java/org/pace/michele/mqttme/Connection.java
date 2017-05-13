@@ -28,15 +28,25 @@ public class Connection implements Serializable {
     }
 
     void setAddress(String address){this.BROKER_ADDR=address;}
+
     void setport(int port){this.BROKER_port=port;}
+
     void setUsername(String username){this.MQTT_USER=username;}
+
     void setPassword(String password){this.MQTT_PASS=password;}
+
     void setClientId(String clientId){this.clientId=clientId;}
+
     String getAddress(){return this.BROKER_ADDR;}
+
     int getPort(){return this.BROKER_port;}
+
     String getUsername(){return this.MQTT_USER;}
+
     String getPassword(){return this.MQTT_PASS;}
+
     String getClientId(){return this.clientId;}
+
     String getBROKER_URL(){return "tcp://"+this.getAddress()+":"+this.getPort();}
 
 }

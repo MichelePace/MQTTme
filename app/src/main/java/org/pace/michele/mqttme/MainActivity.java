@@ -228,6 +228,9 @@ public class MainActivity extends AppCompatActivity {
                     if(item.getType() == MyItem.TOGGLE_ITEM){
                         ((SeekBar)itemsView.get(key).findViewById(R.id.seekBar)).setMax(item.getMax() - item.getMin());
                     }
+                    int p = item.getMax() - item.getMin();
+                    System.out.println("MAX - " + p);
+                    System.out.println("MAX - " + ((SeekBar)itemsView.get(key).findViewById(R.id.seekBar)).getMax());
 
                 } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
                     System.out.println("User pressed back button");
@@ -750,7 +753,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 break;
+
             case MyItem.RANGE_ITEM:
+
                 SeekBar sb = ((SeekBar) item.findViewById(R.id.seekBar));
                 sb.setMax(mi.getMax() - mi.getMin());
                 sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -783,7 +788,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 break;
+
             case MyItem.TOGGLE_ITEM:
+
                 ToggleButton tb = (ToggleButton) item.findViewById(R.id.toggleButton);
                 tb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override

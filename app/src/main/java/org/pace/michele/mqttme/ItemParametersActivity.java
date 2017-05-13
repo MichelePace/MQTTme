@@ -78,6 +78,7 @@ public class ItemParametersActivity extends AppCompatActivity {
         TextView t2 = new TextView(this);
         EditText e2 = new EditText(this);
 
+
         switch(itemType){
             case MyItem.TEXT_ITEM:
 

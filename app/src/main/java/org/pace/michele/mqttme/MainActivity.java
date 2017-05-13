@@ -831,7 +831,20 @@ public class MainActivity extends AppCompatActivity {
      * @param key
      */
     void duplicateItem(int key){
-
+       /* LinearLayout leftColumn = (LinearLayout) findViewById(R.id.left_column);
+        LinearLayout rightColumn = (LinearLayout) findViewById(R.id.right_column);
+        View item=itemsView.get(key);
+        TextView itemName = (TextView) item.findViewById(R.id.name);
+        itemName.append("0");
+        if (key % 2 != 0) {
+            rightColumn.addView(item);
+        } else {
+            System.out.println("ciaooooooooooooooooooooo");
+            leftColumn.addView(item);
+        }
+        items.put(totalItems,items.get(key));
+        itemsView.put(totalItems,itemsView.get(key));
+        totalItems++;*/
     }
 
 

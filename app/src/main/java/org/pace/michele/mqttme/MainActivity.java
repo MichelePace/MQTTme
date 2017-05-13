@@ -26,6 +26,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.io.ByteArrayOutputStream;
@@ -45,11 +46,14 @@ import org.pace.michele.mqttme.MyItem;
 import org.eclipse.paho.client.mqttv3.*;
 
 import static android.R.attr.type;
+import static org.pace.michele.mqttme.R.id.clientId;
 
 public class MainActivity extends AppCompatActivity {
 
     File file;
+    File fileSettings;
     final String path = "/itemStatus";
+    final String pathSettings = "/settingStatus";
 
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
@@ -61,17 +65,21 @@ public class MainActivity extends AppCompatActivity {
 
     private int totalItems = 0;
 
-    // MQTT parameters
+    /* MQTT parameters
     public static final String BROKER_URL = "tcp://m21.cloudmqtt.com:12721";
-    private MqttAndroidClient client;
-    MqttConnectOptions option;
     private final String clientId = "f803h2famjisdsv8pub";
     private final String MQTT_USER = "android";
-    private final char[] MQTT_PASS = {'a','n','d','r','o','i','d'};
+    private final char[] MQTT_PASS = {'a','n','d','r','o','i','d'};*/
 
+
+    private MqttAndroidClient client;
+    MqttConnectOptions option;
+    Connection settings;
+    private final char[] MQTT_PASS = {'a','n','d','r','o','i','d'};
     //Intent contants
     static final int NEW_ITEM = 0;
     static final int MODIFY_ITEM = 1;
+    static final int SETTINGS=2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,9 +134,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        initializeMQTT();
-        mqtt_connect();
+        settings = new Connection();
 
         // Initialize layout
         LinearLayout column = (LinearLayout) findViewById(R.id.left_column);
@@ -138,6 +144,13 @@ public class MainActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 if(!initialized) {
                     initialize();
+                    if(settings.connected)
+                    {
+                        initializeMQTT();
+                        mqtt_connect();
+                    }else{
+                        Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -237,6 +250,20 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             }
+
+            case (SETTINGS):
+                if (resultCode == ItemParametersActivity.RESULT_OK) {
+
+                    settings = (Connection) data.getSerializableExtra("Connection");
+                    initializeMQTT();
+                    mqtt_connect();
+
+                } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
+                    System.out.println("User pressed back button");
+                } else {
+                    Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                }
+                break;
         }
     }
 
@@ -247,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
     void initializeMQTT(){
 
         MemoryPersistence memPer = new MemoryPersistence();
-        client = new MqttAndroidClient(this.getApplicationContext(), BROKER_URL, clientId, memPer);
+        client = new MqttAndroidClient(this.getApplicationContext(), settings.getBROKER_URL(), settings.getClientId(), memPer);
         client.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable cause) {
@@ -269,8 +296,8 @@ public class MainActivity extends AppCompatActivity {
 
         option = new MqttConnectOptions();
         option.setCleanSession(false);
-        option.setUserName(MQTT_USER);
-        option.setPassword(MQTT_PASS);
+        option.setUserName(settings.getUsername());
+        option.setPassword(settings.getPassword().toCharArray());
         option.setAutomaticReconnect(true);
         option.setConnectionTimeout(30);
     }
@@ -290,6 +317,8 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         client.subscribe("/setTemperature", 1);
                         System.out.println("--Subscribed to /setTemperature");
+                        settings.connected=true;
+                        Toast.makeText(getApplicationContext(), "Host connected!", Toast.LENGTH_SHORT).show();
                     } catch (MqttException e) {
                         e.printStackTrace();
                     }
@@ -297,6 +326,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    Toast.makeText(getApplicationContext(), "Fail to connect!", Toast.LENGTH_SHORT).show();
                     System.out.println("--Fail to connect");
                     System.out.println(exception.getCause());
                     System.out.println(exception.getMessage());
@@ -315,30 +345,42 @@ public class MainActivity extends AppCompatActivity {
     void initialize(){
 
         file = new File(this.getFilesDir() + path);
+        fileSettings = new File(this.getFilesDir() + pathSettings);
+        try {
+            if(file.exists() && file.canRead()) {
 
-        if(file.exists() && file.canRead()) {
+                file = new File(this.getFilesDir() + path);
 
-            file = new File(this.getFilesDir() + path);
-            try {
-                FileInputStream input = new FileInputStream(file);
+                    FileInputStream input = new FileInputStream(file);
+                    ObjectInputStream in = new ObjectInputStream(input);
+                    Object obj=in.readObject();
+                    Hashtable<Integer, MyItem> itemi=(Hashtable<Integer, MyItem>) obj;
+                    in.close();
+                    for(int i=0;i<itemi.size();i++)
+                    {
+                        createNewItem(itemi.get(i));
+                    }
+                initialized = true;
+            }
+            if(fileSettings.exists() && fileSettings.canRead()) {
+
+                fileSettings = new File(this.getFilesDir() + pathSettings);
+
+                FileInputStream input = new FileInputStream(fileSettings);
                 ObjectInputStream in = new ObjectInputStream(input);
                 Object obj=in.readObject();
-                Hashtable<Integer, MyItem> itemi=(Hashtable<Integer, MyItem>) obj;
+                settings=(Connection) obj;
                 in.close();
-                for(int i=0;i<itemi.size();i++)
-                {
-                    createNewItem(itemi.get(i));
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                settings.connected=true;
             }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
 
-        initialized = true;
     }
 
 
@@ -361,7 +403,11 @@ public class MainActivity extends AppCompatActivity {
 
         byte[] payload = message.getBytes();
         try {
-            client.publish(topic, payload, qos, retained);
+            if(settings.connected){
+                client.publish(topic, payload, qos, retained);
+            }else{
+                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
+            }
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -465,7 +511,11 @@ public class MainActivity extends AppCompatActivity {
 
         byte[] payload = message.getBytes();
         try {
-            client.publish(topic, payload, qos, retained);
+            if(settings.connected){
+                client.publish(topic, payload, qos, retained);
+            }else{
+                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
+            }
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -577,7 +627,11 @@ public class MainActivity extends AppCompatActivity {
 
         byte[] payload = message.getBytes();
         try {
-            client.publish(topic, payload, qos, retained);
+            if(settings.connected){
+                client.publish(topic, payload, qos, retained);
+            }else{
+                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
+            }
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -926,10 +980,16 @@ public class MainActivity extends AppCompatActivity {
     public void onStop(){
         super.onStop();
         file = new File(this.getFilesDir() + path);
+        fileSettings = new File(this.getFilesDir() + pathSettings);
         try {
             FileOutputStream output= new FileOutputStream(file);
             ObjectOutputStream out = new ObjectOutputStream(output);
             out.writeObject(items);
+            out.flush();
+            out.close();
+            output= new FileOutputStream(fileSettings);
+            out = new ObjectOutputStream(output);
+            out.writeObject(settings);
             out.flush();
             out.close();
         } catch (FileNotFoundException e) {
@@ -956,6 +1016,9 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent myIntent = new Intent(MainActivity.this, SettingConnectionActivity.class);
+            myIntent.putExtra("Connection", settings);
+            MainActivity.this.startActivityForResult(myIntent, SETTINGS);
             return true;
         }
 

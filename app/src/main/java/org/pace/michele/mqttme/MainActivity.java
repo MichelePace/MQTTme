@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private int totalItems = 0;
 
     // MQTT parameters
+
     public static final String BROKER_URL = "tcp://m21.cloudmqtt.com:12721";
     private MqttAndroidClient client;
     MqttConnectOptions option;
@@ -224,10 +225,6 @@ public class MainActivity extends AppCompatActivity {
 
                     ((TextView)itemsView.get(key).findViewById(R.id.name)).setText(item.getName());//Modify the item name in the view
                     items.put(key, item);//Replace the modified item
-
-                    if(item.getType() == MyItem.TOGGLE_ITEM){
-                        ((SeekBar)itemsView.get(key).findViewById(R.id.seekBar)).setMax(item.getMax() - item.getMin());
-                    }
 
                 } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
                     System.out.println("User pressed back button");
@@ -423,10 +420,8 @@ public class MainActivity extends AppCompatActivity {
     void seekBarProgressChanged(int key, int progress){
         if(items.size() > key) {
             View item = itemsView.get(key);
-            MyItem mi = items.get(key);
             TextView tv = (TextView) item.findViewById(R.id.progress);
-            int value = progress + mi.getMin();
-            tv.setText(""+value);
+            tv.setText(""+progress);
         }
     }
 
@@ -444,7 +439,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param key
      */
-    void seekBarStopTracking(int key){
+    void seekBarStokeyacking(int key){
 
     }
 
@@ -460,8 +455,8 @@ public class MainActivity extends AppCompatActivity {
         int qos = mi.getQoS();
 
         View item = itemsView.get(key);
-        TextView t = (TextView) item.findViewById(R.id.progress);
-        String message = t.getText().toString();
+        SeekBar sb = (SeekBar) item.findViewById(R.id.seekBar);
+        String message = String.valueOf(sb.getProgress());
 
         byte[] payload = message.getBytes();
         try {
@@ -714,14 +709,8 @@ public class MainActivity extends AppCompatActivity {
         totalItems++;
     }
 
-
-    /**
-     *
-     * @param item
-     * @param key
-     * @param mi
-     */
-    void setListeners(View item, int key, MyItem mi) {
+    void setListeners(View item, int key, MyItem mi)
+    {
         final int listenKey=key;
         switch (mi.getType())
         {
@@ -764,7 +753,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     public void onStopTrackingTouch(SeekBar seekBar) {
-                        seekBarStopTracking(listenKey);
+                        seekBarStokeyacking(listenKey);
                     }
                 });
 
@@ -803,7 +792,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     /**
      *
      * @param key
@@ -835,19 +823,15 @@ public class MainActivity extends AppCompatActivity {
         }
         items.remove(key);
         itemsView.remove(key);
-        MyItem mi=null;
-        View item=null;
+        MyItem mi=null; View item=null;
         if(key<totalItems)
         {
             for(int i=key+1;i<totalItems;i++)
             {
-                mi=items.get(i);
-                item=itemsView.get(i);
-                items.remove(i);
-                itemsView.remove(i);
+                mi=items.get(i);item=itemsView.get(i);
+                items.remove(i);itemsView.remove(i);
                 setListeners(item,i-1,mi);
-                items.put(i-1,mi);
-                itemsView.put(i-1,item);
+                items.put(i-1,mi);itemsView.put(i-1,item);
                 if ((i-1) % 2 == 0) {
                     rightColumn.removeView(item);
                     leftColumn.addView(item);
@@ -871,6 +855,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
     /**
      *
      * @param obj
@@ -886,7 +871,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return baos.toByteArray().length;
     }
-
 
     /**
      *
@@ -904,7 +888,6 @@ public class MainActivity extends AppCompatActivity {
         return baos.toByteArray();
     }
 
-
     /**
      *
      * @param obj
@@ -919,6 +902,22 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return baos.toByteArray();
+    }
+
+
+    void salva() {
+        /*itemStatus = new File(this.getFilesDir() + path);
+        try {
+            FileOutputStream file= new FileOutputStream(itemStatus);
+            ObjectOutputStream out = new ObjectOutputStream(file);
+            out.writeObject(items);
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 
 

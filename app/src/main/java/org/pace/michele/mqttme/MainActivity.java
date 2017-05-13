@@ -823,15 +823,19 @@ public class MainActivity extends AppCompatActivity {
         }
         items.remove(key);
         itemsView.remove(key);
-        MyItem mi=null; View item=null;
+        MyItem mi=null;
+        View item=null;
         if(key<totalItems)
         {
             for(int i=key+1;i<totalItems;i++)
             {
-                mi=items.get(i);item=itemsView.get(i);
-                items.remove(i);itemsView.remove(i);
+                mi=items.get(i);
+                item=itemsView.get(i);
+                items.remove(i);
+                itemsView.remove(i);
                 setListeners(item,i-1,mi);
-                items.put(i-1,mi);itemsView.put(i-1,item);
+                items.put(i-1,mi);
+                itemsView.put(i-1,item);
                 if ((i-1) % 2 == 0) {
                     rightColumn.removeView(item);
                     leftColumn.addView(item);

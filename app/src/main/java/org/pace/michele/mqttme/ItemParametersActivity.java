@@ -169,7 +169,7 @@ public class ItemParametersActivity extends AppCompatActivity {
 
                     e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
                     e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
-                    e.setText(item.getMin());
+                    e.setText(""+item.getMin());
                     e.setId(R.id.min);
                     horizontalLayout.addView(e);
 
@@ -179,7 +179,7 @@ public class ItemParametersActivity extends AppCompatActivity {
 
                     e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
                     e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
-                    e2.setText(item.getMax());
+                    e2.setText(""+item.getMax());
                     e2.setId(R.id.max);
                     horizontalLayout.addView(e2);
 

@@ -2,6 +2,7 @@ package org.pace.michele.mqttme;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,6 +11,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -793,7 +795,34 @@ public class MainActivity extends AppCompatActivity {
      * @param key
      */
     void deleteItem(int key){
-
+        LinearLayout leftColumn = (LinearLayout) findViewById(R.id.left_column);
+        LinearLayout rightColumn = (LinearLayout) findViewById(R.id.right_column);
+        if (key % 2 != 0) {
+            rightColumn.removeView(itemsView.get(key));
+        } else {
+            leftColumn.removeView(itemsView.get(key));
+        }
+        items.remove(key);
+        itemsView.remove(key);
+        MyItem item=null; View v=null;
+        if(key<totalItems)
+        {
+            for(int i=key+1;i<totalItems;i++)
+            {
+                item=items.get(i);v=itemsView.get(i);
+                items.remove(i);itemsView.remove(i);
+                items.put(key,item);itemsView.put(key,v);
+                if (key % 2 == 0) {
+                    rightColumn.removeView(v);
+                    leftColumn.addView(v);
+                } else {
+                    leftColumn.removeView(v);
+                    rightColumn.addView(v);
+                }
+                key++;
+            }
+        }
+        totalItems--;
     }
 
 

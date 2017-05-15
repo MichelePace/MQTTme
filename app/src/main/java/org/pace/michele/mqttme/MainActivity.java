@@ -295,8 +295,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void connectionLost(Throwable cause) {
                 System.out.println("Connection lost");
-                //cause.printStackTrace();
-                //mqtt_connect();
+                cause.printStackTrace();
+                mqtt_connect();
             }
 
             @Override
@@ -502,18 +502,14 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param key
      */
-    void seekBarStartTracking(int key){
-
-    }
+    void seekBarStartTracking(int key){}
 
 
     /**
      *
      * @param key
      */
-    void seekBarStopTracking(int key){
-
-    }
+    void seekBarStopTracking(int key){}
 
 
     /**

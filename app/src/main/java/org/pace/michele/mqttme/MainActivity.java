@@ -35,6 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
@@ -238,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                     ((TextView)itemsView.get(key).findViewById(R.id.name)).setText(item.getName());//Modify the item name in the view
                     items.put(key, item);//Replace the modified item
 
-                    if(item.getType() == MyItem.TOGGLE_ITEM){
+                    if(item.getType() == MyItem.RANGE_ITEM){
                         ((SeekBar)itemsView.get(key).findViewById(R.id.seekBar)).setMax(item.getMax() - item.getMin());
                     }
 
@@ -302,6 +303,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 System.out.println("Topic: "+topic+", Message: "+message.toString());
+                messageReceived(topic, message.toString());
             }
 
             @Override
@@ -332,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onSuccess(IMqttToken asyncActionToken) {
                     try {
                         client.subscribe("/setTemperature", 1);
-                        System.out.println("--Subscribed to /setTemperature");
+                        client.subscribe("/temperature", 1);
                         settings.connected = true;
                         LinearLayout host = (LinearLayout)findViewById(R.id.host);
                         Snackbar.make(host, "Connected", Snackbar.LENGTH_LONG)
@@ -351,6 +353,7 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println(exception.getCause());
                     System.out.println(exception.getMessage());
                     exception.printStackTrace();
+                    mqtt_connect();
                 }
             });
         } catch (MqttException e) {
@@ -701,6 +704,37 @@ public class MainActivity extends AppCompatActivity {
         d.show();
     }
 
+
+    void messageReceived(String topic, String message){
+        Enumeration<Integer> keys = items.keys();
+        MyItem mi;
+        while (keys.hasMoreElements()){
+            int key = keys.nextElement();
+            mi = items.get(key);
+
+            // If item subscribed to topic
+            if(mi.getSubTopic().equals(topic)) {
+                switch (mi.getType()) {
+                    case MyItem.TEXT_ITEM:
+                        String mess = mi.getPrefix() + message + mi.getPostfix();
+                        ((TextView)itemsView.get(key).findViewById(R.id.message)).setText(mess);
+                        break;
+
+                    case MyItem.RANGE_ITEM:
+                        ((TextView)itemsView.get(key).findViewById(R.id.progress)).setText(message);
+                        break;
+
+                    case MyItem.TOGGLE_ITEM:
+                        if(message.equals(mi.getPressed())) {
+                            ((ToggleButton) itemsView.get(key).findViewById(R.id.toggleButton)).setChecked(true);
+                        }else if(message.equals(mi.getUnpressed())){
+                            ((ToggleButton) itemsView.get(key).findViewById(R.id.toggleButton)).setChecked(false);
+                        }
+                        break;
+                }
+            }
+        }
+    }
 
 
     // New item

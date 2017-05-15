@@ -35,16 +35,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.pace.michele.mqttme.MyItem;
 import org.eclipse.paho.client.mqttv3.*;
-
-import static android.R.attr.type;
-import static org.pace.michele.mqttme.R.id.clientId;
 
 public class MainActivity extends AppCompatActivity {
 

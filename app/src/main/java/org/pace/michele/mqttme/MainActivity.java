@@ -59,11 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
     private int totalItems = 0;
 
-    /* MQTT parameters
-    BROKER_URL = "tcp://m21.cloudmqtt.com:12721";
-    clientId = "f803h2famjisdsv8pub";
-    MQTT_USER = "android";
-    MQTT_PASS = {'a','n','d','r','o','i','d'};*/
 
     private MqttAndroidClient client;
     MqttConnectOptions option;

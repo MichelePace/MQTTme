@@ -67,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
     //Intent contants
     static final int NEW_ITEM = 0;
     static final int MODIFY_ITEM = 1;
-    static final int SETTINGS = 2;
+    static final int SERVER_SETTINGS = 2;
+
+    boolean brokerSettings = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,21 +129,31 @@ public class MainActivity extends AppCompatActivity {
         // Initialize layout
         LinearLayout column = (LinearLayout) findViewById(R.id.left_column);
 
+
+
         column.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 if(!initialized) {
                     initialize();
-                    if(settings.connected)
+                    if(brokerSettings)
                     {
                         initializeMQTT();
                         mqtt_connect();
-                    }else{
-                        Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
+
+                    }else {
+                        LinearLayout host = (LinearLayout)findViewById(R.id.host);
+                        Snackbar.make(host, "No broker parameters found", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     }
                 }
             }
         });
+
+        /*if(!settings.connected){
+            Snackbar.make(column, "Not connected", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+        }*/
 
     }
 
@@ -239,16 +251,33 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
 
-            case (SETTINGS):
+            case (SERVER_SETTINGS):
                 if (resultCode == ItemParametersActivity.RESULT_OK) {
                     settings = (Connection) data.getSerializableExtra("Connection");
+                    brokerSettings = true;
+
+                    //Save settings on file
+                    fileSettings = new File(this.getFilesDir() + pathSettings);
+                    try {
+                        FileOutputStream output= new FileOutputStream(fileSettings);
+                        ObjectOutputStream out = new ObjectOutputStream(output);
+                        out.writeObject(settings);
+                        out.flush();
+                        out.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     initializeMQTT();
                     mqtt_connect();
 
                 } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
                     System.out.println("User pressed back button");
                 } else {
-                    Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                 }
                 break;
         }
@@ -304,8 +333,10 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         client.subscribe("/setTemperature", 1);
                         System.out.println("--Subscribed to /setTemperature");
-                        settings.connected=true;
-                        Toast.makeText(getApplicationContext(), "Host connected!", Toast.LENGTH_SHORT).show();
+                        settings.connected = true;
+                        LinearLayout host = (LinearLayout)findViewById(R.id.host);
+                        Snackbar.make(host, "Connected", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
                     } catch (MqttException e) {
                         e.printStackTrace();
                     }
@@ -313,8 +344,10 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    Toast.makeText(getApplicationContext(), "Fail to connect!", Toast.LENGTH_SHORT).show();
-                    System.out.println("--Fail to connect");
+                    settings.connected = false;
+                    LinearLayout host = (LinearLayout)findViewById(R.id.host);
+                    Snackbar.make(host, "Not connected", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
                     System.out.println(exception.getCause());
                     System.out.println(exception.getMessage());
                     exception.printStackTrace();
@@ -349,17 +382,18 @@ public class MainActivity extends AppCompatActivity {
                     }
                 initialized = true;
             }
-            if(fileSettings.exists() && fileSettings.canRead()) {
 
-                fileSettings = new File(this.getFilesDir() + pathSettings);
+            if(fileSettings.exists() && fileSettings.canRead()) {
 
                 FileInputStream input = new FileInputStream(fileSettings);
                 ObjectInputStream in = new ObjectInputStream(input);
                 Object obj=in.readObject();
                 settings=(Connection) obj;
                 in.close();
-                settings.connected=true;
+
+                brokerSettings = true;
             }
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -975,11 +1009,6 @@ public class MainActivity extends AppCompatActivity {
             out.writeObject(items);
             out.flush();
             out.close();
-            output= new FileOutputStream(fileSettings);
-            out = new ObjectOutputStream(output);
-            out.writeObject(settings);
-            out.flush();
-            out.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -1006,7 +1035,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             Intent myIntent = new Intent(MainActivity.this, SettingConnectionActivity.class);
             myIntent.putExtra("Connection", settings);
-            MainActivity.this.startActivityForResult(myIntent, SETTINGS);
+            MainActivity.this.startActivityForResult(myIntent, SERVER_SETTINGS);
             return true;
         }
 

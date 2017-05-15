@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowManager;
@@ -146,6 +147,7 @@ public class ItemParametersActivity extends AppCompatActivity {
                     e.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
                     e.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
                     e.setText("0");
+                    e.setInputType(InputType.TYPE_CLASS_NUMBER);
                     e.setId(R.id.min);
                     horizontalLayout.addView(e);
 
@@ -156,6 +158,7 @@ public class ItemParametersActivity extends AppCompatActivity {
                     e2.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 18);
                     e2.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0.25f));
                     e2.setText("100");
+                    e.setInputType(InputType.TYPE_CLASS_NUMBER);
                     e2.setId(R.id.max);
                     horizontalLayout.addView(e2);
 

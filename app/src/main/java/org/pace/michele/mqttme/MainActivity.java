@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     //Intent contants
     static final int NEW_ITEM = 0;
     static final int MODIFY_ITEM = 1;
-    static final int SETTINGS=2;
+    static final int SETTINGS = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

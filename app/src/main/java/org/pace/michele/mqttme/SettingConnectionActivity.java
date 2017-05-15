@@ -5,13 +5,10 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-
-/**
- * Created by gianvito on 13/05/17.
- */
 
 public class SettingConnectionActivity extends AppCompatActivity {
 
@@ -24,7 +21,7 @@ public class SettingConnectionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.setting_connection);
+        setContentView(R.layout.activity_setting_connection);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
@@ -49,7 +46,7 @@ public class SettingConnectionActivity extends AppCompatActivity {
         settings.setport(Integer.parseInt(((EditText)findViewById(R.id.edit_port)).getText().toString()));
         settings.setUsername(((EditText)findViewById(R.id.edit_username)).getText().toString());
         settings.setPassword(((EditText)findViewById(R.id.edit_password)).getText().toString());
-        settings.setClientId(((EditText)findViewById(R.id.edit_clientId)).getText().toString());
+        settings.setClientId(((EditText)findViewById(R.id.edit_clientID)).getText().toString());
         Intent resultIntent = new Intent();
         resultIntent.putExtra("Connection", settings);
         setResult(RESULT_OK, resultIntent);
@@ -60,7 +57,7 @@ public class SettingConnectionActivity extends AppCompatActivity {
         ((EditText)findViewById(R.id.edit_username)).setText(settingsIntent.getUsername());
         ((EditText)findViewById(R.id.edit_address)).setText(settingsIntent.getAddress());
         ((EditText)findViewById(R.id.edit_port)).setText(String.valueOf(settingsIntent.getPort()));
-        ((EditText)findViewById(R.id.edit_clientId)).setText(settingsIntent.getClientId());
+        ((EditText)findViewById(R.id.edit_clientID)).setText(settingsIntent.getClientId());
         ((EditText)findViewById(R.id.edit_password)).setText(settingsIntent.getPassword());
     }
 
@@ -71,6 +68,5 @@ public class SettingConnectionActivity extends AppCompatActivity {
         setResult(RESULT_BACK, resultIntent);
         finish();
     }
-
 
 }

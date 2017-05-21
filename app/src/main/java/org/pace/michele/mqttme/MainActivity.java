@@ -353,7 +353,8 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println(exception.getCause());
                     System.out.println(exception.getMessage());
                     exception.printStackTrace();
-                    mqtt_connect();
+
+                    //mqtt_connect();
                 }
             });
         } catch (MqttException e) {
@@ -1067,7 +1068,12 @@ public class MainActivity extends AppCompatActivity {
             myIntent.putExtra("Connection", settings);
             MainActivity.this.startActivityForResult(myIntent, SERVER_SETTINGS);
             return true;
+        }else if (id == R.id.action_reconnect) {
+            mqtt_connect();
+            return true;
         }
+
+
 
         return super.onOptionsItemSelected(item);
     }

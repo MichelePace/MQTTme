@@ -1,11 +1,17 @@
 package org.pace.michele.mqttme;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -27,7 +33,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -37,6 +42,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Vector;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -52,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
-    Hashtable<Integer, View> itemsView = new Hashtable<Integer, View>();
+    private Hashtable<Integer, View> itemsView = new Hashtable<Integer, View>();
+    Hashtable<String, Integer> topics = new Hashtable<String, Integer>();
 
     EditText messageToSend;
 
@@ -60,9 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int totalItems = 0;
 
-
-    private MqttAndroidClient client;
-    MqttConnectOptions option;
+    //Server settings
     Connection settings;
 
     //Intent contants
@@ -70,11 +75,27 @@ public class MainActivity extends AppCompatActivity {
     static final int MODIFY_ITEM = 1;
     static final int SERVER_SETTINGS = 2;
 
-    boolean brokerSettings = false;
+    boolean brokerSetted = false;
+
+    static boolean main_activity_running = false;
+
+    ServiceConnection mConnection;
+    PushNotificationService mService;
+    boolean mBound = false;
+
+    //Notifications
+    private int notificationID = 0;
+    long[] vibration = {200, 350, 100, 350};
+    Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        main_activity_running = true;
+
+        startAndBoundService();
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -130,36 +151,23 @@ public class MainActivity extends AppCompatActivity {
         // Initialize layout
         LinearLayout column = (LinearLayout) findViewById(R.id.left_column);
 
-
-
         column.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 if(!initialized) {
                     initialize();
-                    if(brokerSettings)
-                    {
-                        initializeMQTT();
-                        mqtt_connect();
 
-                    }else {
-                        LinearLayout host = (LinearLayout)findViewById(R.id.host);
-                        Snackbar.make(host, "No broker parameters found", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
+                    if(mBound){
+
                     }
+
                 }
             }
         });
-
-        /*if(!settings.connected){
-            Snackbar.make(column, "Not connected", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
-        }*/
-
     }
 
 
-    @Override
+    /*@Override
     protected void onResume() {
         super.onResume();
         // ask for permission
@@ -209,6 +217,63 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         }
+    }*/
+
+
+    /**
+     *
+     */
+    void startAndBoundService(){
+        if(isMyServiceRunning(PushNotificationService.class)){
+            System.out.println("++++++Service running");
+        }else{
+            System.out.println("++++++Service not running");
+            Intent myIntent = new Intent(MainActivity.this, PushNotificationService.class);
+            MainActivity.this.startService(myIntent);
+        }
+
+        /** Defines callbacks for service binding, passed to bindService() */
+        mConnection = new ServiceConnection() {
+
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder binder) {
+                // We've bound to PushNotificationService, cast the IBinder and get PushNotificationService instance
+                PushNotificationService.LocalBinder localBinder = (PushNotificationService.LocalBinder) binder;
+                mService = localBinder.getService();
+                mBound = true;
+
+                mService.setMainActivity(MainActivity.this);
+
+                Vector<MyMessage> messages = mService.getMessages();
+                MyMessage mMessage;
+                for(int i = 0; i < messages.size(); i++){
+                    mMessage = messages.get(i);
+                    messageReceived(mMessage.getTopic(), mMessage.getMessage());
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {
+                mBound = false;
+            }
+        };
+
+        // Bind to PushNotificationService
+        Intent intent = new Intent(this, PushNotificationService.class);
+        bindService(intent, mConnection, Context.BIND_ABOVE_CLIENT);
+    }
+
+
+    void clientConnection(boolean connected){
+        if(connected){
+            LinearLayout host = (LinearLayout)findViewById(R.id.host);
+            Snackbar.make(host, "Connected", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+        }else{
+            LinearLayout host = (LinearLayout)findViewById(R.id.host);
+            Snackbar.make(host, "Not connected", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+        }
     }
 
 
@@ -239,6 +304,18 @@ public class MainActivity extends AppCompatActivity {
                     ((TextView)itemsView.get(key).findViewById(R.id.name)).setText(item.getName());//Modify the item name in the view
                     items.put(key, item);//Replace the modified item
 
+                    // Append subscription topic
+                    if(topics.containsKey(item.getSubTopic())){
+                        int n = topics.get(item.getSubTopic());
+                        n++;
+                        topics.put(item.getSubTopic(), n);
+                    }else{
+                        topics.put(item.getSubTopic(), 1);
+                        if(mBound) {
+                            mService.subscribe(item.getSubTopic(), item.getQoS());
+                        }
+                    }
+
                     if(item.getType() == MyItem.RANGE_ITEM){
                         ((SeekBar)itemsView.get(key).findViewById(R.id.seekBar)).setMax(item.getMax() - item.getMin());
                     }
@@ -255,7 +332,13 @@ public class MainActivity extends AppCompatActivity {
             case (SERVER_SETTINGS):
                 if (resultCode == ItemParametersActivity.RESULT_OK) {
                     settings = (Connection) data.getSerializableExtra("Connection");
-                    brokerSettings = true;
+
+                    if(mBound){
+                        mService.setConnection(settings);
+                        mService.initializeMQTT();
+                        mService.mqtt_connect();
+                        brokerSetted = true;
+                    }
 
                     //Save settings on file
                     fileSettings = new File(this.getFilesDir() + pathSettings);
@@ -271,9 +354,6 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    initializeMQTT();
-                    mqtt_connect();
-
                 } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
                     System.out.println("User pressed back button");
                 } else {
@@ -281,84 +361,6 @@ public class MainActivity extends AppCompatActivity {
                             .setAction("Action", null).show();
                 }
                 break;
-        }
-    }
-
-
-    /**
-     *
-     */
-    void initializeMQTT(){
-
-        MemoryPersistence memPer = new MemoryPersistence();
-        client = new MqttAndroidClient(this.getApplicationContext(), settings.getBROKER_URL(), settings.getClientId(), memPer);
-        client.setCallback(new MqttCallback() {
-            @Override
-            public void connectionLost(Throwable cause) {
-                System.out.println("Connection lost");
-                cause.printStackTrace();
-                mqtt_connect();
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                System.out.println("Topic: "+topic+", Message: "+message.toString());
-                messageReceived(topic, message.toString());
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
-            }
-        });
-
-        option = new MqttConnectOptions();
-        option.setCleanSession(false);
-        option.setUserName(settings.getUsername());
-        option.setPassword(settings.getPassword().toCharArray());
-        option.setAutomaticReconnect(true);
-        option.setConnectionTimeout(30);
-    }
-
-
-    /**
-     *
-     */
-    void mqtt_connect(){
-
-        System.out.println("--Trying to connect");
-
-        try {
-            client.connect(option, this.getApplicationContext(), new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    try {
-                        client.subscribe("/setTemperature", 1);
-                        client.subscribe("/temperature", 1);
-                        settings.connected = true;
-                        LinearLayout host = (LinearLayout)findViewById(R.id.host);
-                        Snackbar.make(host, "Connected", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    settings.connected = false;
-                    LinearLayout host = (LinearLayout)findViewById(R.id.host);
-                    Snackbar.make(host, "Not connected", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    System.out.println(exception.getCause());
-                    System.out.println(exception.getMessage());
-                    exception.printStackTrace();
-
-                    //mqtt_connect();
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
         }
     }
 
@@ -378,11 +380,11 @@ public class MainActivity extends AppCompatActivity {
                     FileInputStream input = new FileInputStream(file);
                     ObjectInputStream in = new ObjectInputStream(input);
                     Object obj=in.readObject();
-                    Hashtable<Integer, MyItem> itemi=(Hashtable<Integer, MyItem>) obj;
+                    items = (Hashtable<Integer, MyItem>) obj;
                     in.close();
-                    for(int i=0;i<itemi.size();i++)
+                    for(int i=0; i < items.size(); i++)
                     {
-                        createNewItem(itemi.get(i));
+                        createNewItem(items.get(i));
                     }
                 initialized = true;
             }
@@ -395,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
                 settings=(Connection) obj;
                 in.close();
 
-                brokerSettings = true;
+                brokerSetted = true;
             }
 
         } catch (FileNotFoundException e) {
@@ -427,14 +429,11 @@ public class MainActivity extends AppCompatActivity {
         else message = mi.getUnpressed();
 
         byte[] payload = message.getBytes();
-        try {
-            if(settings.connected){
-                client.publish(topic, payload, qos, retained);
-            }else{
-                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
-            }
-        } catch (MqttException e) {
-            e.printStackTrace();
+
+        if(mBound){
+            mService.publish(topic, payload, qos, retained);
+        }else{
+            Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -532,14 +531,11 @@ public class MainActivity extends AppCompatActivity {
         String message = t.getText().toString();
 
         byte[] payload = message.getBytes();
-        try {
-            if(settings.connected){
-                client.publish(topic, payload, qos, retained);
-            }else{
-                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
-            }
-        } catch (MqttException e) {
-            e.printStackTrace();
+
+        if(mBound){
+            mService.publish(topic, payload, qos, retained);
+        }else{
+            Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -648,14 +644,11 @@ public class MainActivity extends AppCompatActivity {
         t.setText(message);
 
         byte[] payload = message.getBytes();
-        try {
-            if(settings.connected){
-                client.publish(topic, payload, qos, retained);
-            }else{
-                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
-            }
-        } catch (MqttException e) {
-            e.printStackTrace();
+
+        if(mBound){
+            mService.publish(topic, payload, qos, retained);
+        }else{
+            Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -706,7 +699,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    void messageReceived(String topic, String message){
+    void messageReceived(String topic, MqttMessage message){
         Enumeration<Integer> keys = items.keys();
         MyItem mi;
         while (keys.hasMoreElements()){
@@ -722,7 +715,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
                     case MyItem.RANGE_ITEM:
-                        ((TextView)itemsView.get(key).findViewById(R.id.progress)).setText(message);
+                        ((TextView)itemsView.get(key).findViewById(R.id.progress)).setText(message.toString());
                         break;
 
                     case MyItem.TOGGLE_ITEM:
@@ -735,6 +728,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
     }
 
 
@@ -816,6 +810,18 @@ public class MainActivity extends AppCompatActivity {
 
             itemsView.put(key, item);
             items.put(key, mi);
+        }
+
+        // Append subscription topic
+        if(topics.containsKey(mi.getSubTopic())){
+            int n = topics.get(mi.getSubTopic());
+            n++;
+            topics.put(mi.getSubTopic(), n);
+        }else{
+            topics.put(mi.getSubTopic(), 1);
+            if(mBound) {
+                mService.subscribe(mi.getSubTopic(), mi.getQoS());
+            }
         }
 
         totalItems++;
@@ -917,6 +923,20 @@ public class MainActivity extends AppCompatActivity {
      */
     void modifyItem(int key){
         MyItem item = items.get(key);
+
+        // Delete subscription topic
+        int n = topics.get(item.getSubTopic());
+
+        if(n == 1){
+            topics.remove(item.getSubTopic());
+            if(mBound) {
+                mService.unsubscribe(item.getSubTopic());
+            }
+        }else{
+            n--;
+            topics.put(item.getSubTopic(), n);
+        }
+
         Intent myIntent = new Intent(MainActivity.this, ItemParametersActivity.class);
 
         //Optional parameters
@@ -940,9 +960,25 @@ public class MainActivity extends AppCompatActivity {
         } else {
             leftColumn.removeView(itemsView.get(key));
         }
+
+        MyItem mi = items.get(key);
+
+        // Delete subscription topic
+        int n = topics.get(mi.getSubTopic());
+
+        if(n == 1){
+            topics.remove(mi.getSubTopic());
+            if(mBound) {
+                mService.unsubscribe(mi.getSubTopic());
+            }
+        }else{
+            n--;
+            topics.put(mi.getSubTopic(), n);
+        }
+
         items.remove(key);
         itemsView.remove(key);
-        MyItem mi=null;
+        mi = null;
         View item=null;
         if(key<totalItems)
         {
@@ -964,6 +1000,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
         totalItems--;
     }
 
@@ -980,52 +1017,17 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      *
-     * @param obj
+     * @param serviceClass
      * @return
      */
-    long getObjectSize(MyItem obj){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(obj);
-        } catch (IOException e) {
-            e.printStackTrace();
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
         }
-        return baos.toByteArray().length;
-    }
-
-
-    /**
-     *
-     * @param obj
-     * @return
-     */
-    byte[] getObjectByteArray(MyItem obj){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(obj);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return baos.toByteArray();
-    }
-
-
-    /**
-     *
-     * @param obj
-     * @return
-     */
-    byte[] getObjectByteArray(Hashtable obj){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(obj);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return baos.toByteArray();
+        return false;
     }
 
 
@@ -1045,6 +1047,7 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        main_activity_running = false;
     }
 
 
@@ -1064,12 +1067,25 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
             Intent myIntent = new Intent(MainActivity.this, SettingConnectionActivity.class);
             myIntent.putExtra("Connection", settings);
             MainActivity.this.startActivityForResult(myIntent, SERVER_SETTINGS);
             return true;
+
         }else if (id == R.id.action_reconnect) {
-            mqtt_connect();
+
+            if(brokerSetted) {
+                if(mBound) {
+                    mService.mqtt_connect();
+                }else{
+                    startAndBoundService();
+                }
+            }else{
+                LinearLayout host = (LinearLayout)findViewById(R.id.host);
+                Snackbar.make(host, "No broker parameters found", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
             return true;
         }
 

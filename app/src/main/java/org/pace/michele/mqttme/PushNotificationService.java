@@ -85,8 +85,16 @@ public class PushNotificationService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        System.out.println(" ++++++++++ onBind() called");
+        System.out.println(" ++++++++ onBind() called");
         return mBinder;
+    }
+
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        super.onUnbind(intent);
+        System.out.println(" ++++++++ onUnbind() called");
+        return true;
     }
 
 
@@ -262,7 +270,7 @@ public class PushNotificationService extends Service {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
 
-                    System.out.println("+++ Connected");
+                    System.out.println(" +++ Connected");
 
                     //Subscribe to all topics
                     Enumeration<MyItem> e;
@@ -290,7 +298,7 @@ public class PushNotificationService extends Service {
                         timerObj.purge();
                     }*/
 
-                    System.out.println("+++ Subscribed");
+                    System.out.println(" +++ Subscribed");
 
                     if(MainActivity.main_activity_running && mainActivity != null){
                         mainActivity.clientConnection(true);
@@ -304,6 +312,8 @@ public class PushNotificationService extends Service {
                     if(MainActivity.main_activity_running && mainActivity != null){
                         mainActivity.clientConnection(false);
                     }
+
+                    System.out.println(" +++ Not connected ");
 
                     /*timerObj = new Timer();
                     timerTaskObj = new TimerTask() {
@@ -337,7 +347,7 @@ public class PushNotificationService extends Service {
             // prepare intent which is triggered if the
             // notification is selected
             Intent intent = new Intent(this, MainActivity.class);
-            PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, 0);
+            PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Notification notification = new Notification.Builder(this)
                     .setContentTitle(topic)

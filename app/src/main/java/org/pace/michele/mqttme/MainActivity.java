@@ -92,10 +92,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        main_activity_running = true;
-
-        startAndBoundService();
-
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -156,11 +152,6 @@ public class MainActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 if(!initialized) {
                     initialize();
-
-                    if(mBound){
-
-                    }
-
                 }
             }
         });
@@ -171,41 +162,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         main_activity_running = true;
+        startAndBoundService();
     }
-
-
-    /*@Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
-                    Snackbar.make(findViewById(android.R.id.content), "You have to allow to use external storage to use this app!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    this.finish();
-                }
-                return;
-            }
-
-            case 2: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-
-                } else {
-                    Snackbar.make(findViewById(android.R.id.content), "You have to allow to use external storage to use this app!", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                    this.finish();
-                }
-                return;
-            }
-        }
-    }*/
 
 
     /**
@@ -220,37 +178,51 @@ public class MainActivity extends AppCompatActivity {
             MainActivity.this.startService(myIntent);
         }
 
-        /** Defines callbacks for service binding, passed to bindService() */
-        mConnection = new ServiceConnection() {
 
-            @Override
-            public void onServiceConnected(ComponentName className, IBinder binder) {
-                // We've bound to PushNotificationService, cast the IBinder and get PushNotificationService instance
-                PushNotificationService.LocalBinder localBinder = (PushNotificationService.LocalBinder) binder;
-                mService = localBinder.getService();
-                mBound = true;
+        if(mBound){
 
-                mService.setMainActivity(MainActivity.this);
+            Vector<MyMessage> messages = mService.getMessages();
+            MyMessage mMessage;
+            for(int i = 0; i < messages.size(); i++){
+                mMessage = messages.get(i);
+                messageReceived(mMessage.getTopic(), mMessage.getMessage());
+            }
 
-                Vector<MyMessage> messages = mService.getMessages();
-                MyMessage mMessage;
-                for(int i = 0; i < messages.size(); i++){
-                    mMessage = messages.get(i);
-                    messageReceived(mMessage.getTopic(), mMessage.getMessage());
+        }else{
+
+            /** Defines callbacks for service binding, passed to bindService() */
+            mConnection = new ServiceConnection() {
+
+                @Override
+                public void onServiceConnected(ComponentName className, IBinder binder) {
+                    // We've bound to PushNotificationService, cast the IBinder and get PushNotificationService instance
+                    PushNotificationService.LocalBinder localBinder = (PushNotificationService.LocalBinder) binder;
+                    mService = localBinder.getService();
+                    mBound = true;
+
+                    mService.setMainActivity(MainActivity.this);
+
+                    Vector<MyMessage> messages = mService.getMessages();
+                    MyMessage mMessage;
+                    for(int i = 0; i < messages.size(); i++){
+                        mMessage = messages.get(i);
+                        messageReceived(mMessage.getTopic(), mMessage.getMessage());
+                    }
+                    System.out.println(" +++ Bound to service");
                 }
-                System.out.println(" +++ Bound to service");
-            }
 
-            @Override
-            public void onServiceDisconnected(ComponentName arg0) {
-                mBound = false;
-                System.out.println(" +++ Not bound to service");
-            }
-        };
+                @Override
+                public void onServiceDisconnected(ComponentName arg0) {
+                    mBound = false;
+                    System.out.println(" +++ Not bound to service");
+                }
+            };
 
-        // Bind to PushNotificationService
-        Intent intent = new Intent(this, PushNotificationService.class);
-        bindService(intent, mConnection, Context.BIND_ABOVE_CLIENT);
+            // Bind to PushNotificationService
+            Intent intent = new Intent(this, PushNotificationService.class);
+            bindService(intent, mConnection, Context.BIND_ABOVE_CLIENT);
+        }
+
     }
 
 
@@ -690,10 +662,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     void messageReceived(String topic, MqttMessage message){
+        System.out.println("+++++++++++++++ item.size(): " + items.size() + " - Total items: " + totalItems);
         Enumeration<Integer> keys = items.keys();
         MyItem mi;
         while (keys.hasMoreElements()){
-            int key = keys.nextElement();
+            final int key = keys.nextElement();
             mi = items.get(key);
 
             // If item subscribed to topic
@@ -711,10 +684,27 @@ public class MainActivity extends AppCompatActivity {
                     case MyItem.TOGGLE_ITEM:
                         String press = mi.getPressed();
                         String unpress = mi.getUnpressed();
+                        ToggleButton b = ((ToggleButton) itemsView.get(key).findViewById(R.id.toggleButton));
                         if(message.toString().equals(press)) {
-                            ((ToggleButton) itemsView.get(key).findViewById(R.id.toggleButton)).setChecked(true);
+                            //Remove and readd the listener to avoid that setting the check recalls onCheckedChange event
+                            b.setOnCheckedChangeListener(null);
+                            b.setChecked(true);
+                            b.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    togglePressed(key, isChecked);
+                                }
+                            });
                         }else if(message.toString().equals(unpress)){
-                            ((ToggleButton) itemsView.get(key).findViewById(R.id.toggleButton)).setChecked(false);
+                            //Remove and readd the listener to avoid that setting the check recalls onCheckedChange event
+                            b.setOnCheckedChangeListener(null);
+                            b.setChecked(false);
+                            b.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    togglePressed(key, isChecked);
+                                }
+                            });
                         }
                         break;
                 }
@@ -831,6 +821,7 @@ public class MainActivity extends AppCompatActivity {
         switch (mi.getType())
         {
             case MyItem.TEXT_ITEM:
+
                 TextView message = (TextView) item.findViewById(R.id.message);
 
                 item.setOnClickListener(new View.OnClickListener() {
@@ -855,7 +846,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 break;
+
             case MyItem.RANGE_ITEM:
+
                 SeekBar sb = ((SeekBar) item.findViewById(R.id.seekBar));
                 sb.setMax(mi.getMax() - mi.getMin());
                 sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -888,7 +881,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 break;
+
             case MyItem.TOGGLE_ITEM:
+
                 ToggleButton tb = (ToggleButton) item.findViewById(R.id.toggleButton);
                 tb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
@@ -1027,7 +1022,6 @@ public class MainActivity extends AppCompatActivity {
     public void onStop(){
         super.onStop();
         file = new File(this.getFilesDir() + path);
-        fileSettings = new File(this.getFilesDir() + pathSettings);
         try {
             FileOutputStream output= new FileOutputStream(file);
             ObjectOutputStream out = new ObjectOutputStream(output);
@@ -1042,6 +1036,11 @@ public class MainActivity extends AppCompatActivity {
         main_activity_running = false;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConnection);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

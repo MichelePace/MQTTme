@@ -29,7 +29,7 @@ dependencies {
     //compile 'com.google.firebase:firebase-core:10.2.6'
 
     //paho
-    
+
 
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'

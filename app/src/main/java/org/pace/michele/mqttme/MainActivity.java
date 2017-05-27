@@ -167,26 +167,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    /*@Override
+    @Override
     protected void onResume() {
         super.onResume();
-        // ask for permission
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                || ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-            }
-        }else{
-
-        }
+        main_activity_running = true;
     }
 
 
-    @Override
+    /*@Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 1: {
@@ -250,11 +238,13 @@ public class MainActivity extends AppCompatActivity {
                     mMessage = messages.get(i);
                     messageReceived(mMessage.getTopic(), mMessage.getMessage());
                 }
+                System.out.println(" +++ Bound to service");
             }
 
             @Override
             public void onServiceDisconnected(ComponentName arg0) {
                 mBound = false;
+                System.out.println(" +++ Not bound to service");
             }
         };
 
@@ -719,9 +709,11 @@ public class MainActivity extends AppCompatActivity {
                         break;
 
                     case MyItem.TOGGLE_ITEM:
-                        if(message.equals(mi.getPressed())) {
+                        String press = mi.getPressed();
+                        String unpress = mi.getUnpressed();
+                        if(message.toString().equals(press)) {
                             ((ToggleButton) itemsView.get(key).findViewById(R.id.toggleButton)).setChecked(true);
-                        }else if(message.equals(mi.getUnpressed())){
+                        }else if(message.toString().equals(unpress)){
                             ((ToggleButton) itemsView.get(key).findViewById(R.id.toggleButton)).setChecked(false);
                         }
                         break;

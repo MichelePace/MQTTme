@@ -159,7 +159,7 @@ public class PushNotificationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        System.out.println(" ++++++++++ Service started");
+        System.out.println(" +++ Service started");
 
         settings = new Connection();
 
@@ -264,7 +264,6 @@ public class PushNotificationService extends Service {
 
                     System.out.println("+++ Connected");
 
-
                     //Subscribe to all topics
                     Enumeration<MyItem> e;
                     MyItem mi;
@@ -286,10 +285,10 @@ public class PushNotificationService extends Service {
 
                     settings.connected = true;
 
-                    if(timerObj != null) {
+                    /*if(timerObj != null) {
                         timerObj.cancel();
                         timerObj.purge();
-                    }
+                    }*/
 
                     System.out.println("+++ Subscribed");
 
@@ -306,13 +305,13 @@ public class PushNotificationService extends Service {
                         mainActivity.clientConnection(false);
                     }
 
-                    timerObj = new Timer();
+                    /*timerObj = new Timer();
                     timerTaskObj = new TimerTask() {
                         public void run() {
                             mqtt_connect();
                         }
                     };
-                    timerObj.schedule(timerTaskObj, 0, 10000);
+                    timerObj.schedule(timerTaskObj, 0, 10000);*/
 
                     System.out.println(exception.getCause());
                     System.out.println(exception.getMessage());
@@ -366,6 +365,6 @@ public class PushNotificationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        System.out.println(" ++++++++++ Service stopped");
+        System.out.println(" +++ Service stopped");
     }
 }

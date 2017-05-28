@@ -53,6 +53,7 @@ public class PushNotificationService extends Service {
     private int notificationID = 0;
     private long[] vibration = {200, 350, 100, 350};
     private Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+    NotificationManager notificationManager;
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
@@ -105,6 +106,9 @@ public class PushNotificationService extends Service {
     public Vector<MyMessage> getMessages(){
         Vector<MyMessage> temp = messages;
         messages = new Vector<MyMessage>();
+        if(notificationManager != null) {
+            notificationManager.cancelAll();
+        }
         return temp;
     }
 
@@ -358,7 +362,7 @@ public class PushNotificationService extends Service {
                     .setVibrate(vibration)
                     .setSound(ringtone).build();
 
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             notificationManager.notify(notificationID, notification);
 
             MyMessage mMessage = new MyMessage(topic, message);

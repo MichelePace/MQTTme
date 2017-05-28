@@ -83,11 +83,6 @@ public class MainActivity extends AppCompatActivity {
     PushNotificationService mService;
     boolean mBound = false;
 
-    //Notifications
-    private int notificationID = 0;
-    long[] vibration = {200, 350, 100, 350};
-    Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

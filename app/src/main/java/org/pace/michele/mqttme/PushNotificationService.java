@@ -237,7 +237,9 @@ public class PushNotificationService extends Service {
             @Override
             public void connectionLost(Throwable cause) {
                 System.out.println("Connection lost");
-                cause.printStackTrace();
+                if(cause != null) {
+                    cause.printStackTrace();
+                }
                 mqtt_connect();
             }
 

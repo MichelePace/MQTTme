@@ -358,7 +358,7 @@ public class PushNotificationService extends Service {
             Notification notification = new Notification.Builder(this)
                     .setContentTitle(topic)
                     .setContentText(message.toString())
-                    .setSmallIcon(R.mipmap.mqttme)
+                    .setSmallIcon(R.drawable.ic_ico_notify)
                     .setContentIntent(pIntent)
                     .setAutoCancel(true)
                     .setVibrate(vibration)

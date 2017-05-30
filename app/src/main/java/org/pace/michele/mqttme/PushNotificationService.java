@@ -9,8 +9,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
-import android.support.design.widget.Snackbar;
-import android.widget.LinearLayout;
+import android.support.v4.app.NotificationCompat;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -53,7 +52,9 @@ public class PushNotificationService extends Service {
     private int notificationID = 0;
     private long[] vibration = {200, 350, 100, 350};
     private Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    NotificationManager notificationManager;
+    private NotificationManager notificationManager;
+    private int notif_number = 0;
+    StringBuffer notification_message = new StringBuffer();
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
@@ -109,6 +110,8 @@ public class PushNotificationService extends Service {
         if(notificationManager != null) {
             notificationManager.cancelAll();
         }
+        notif_number = 0;
+        notification_message = new StringBuffer();
         return temp;
     }
 
@@ -348,6 +351,17 @@ public class PushNotificationService extends Service {
      */
     void messageReceived(String topic, MqttMessage message){
 
+        String notification_title;
+        notif_number++;
+
+        if(notif_number == 1) {
+            notification_title = "1 message";
+        }else{
+            notification_title = notif_number + " messages";
+        }
+
+        notification_message.append(topic + ": " + message.toString() + "\n");
+
         if(!MainActivity.main_activity_running) {
 
             // prepare intent which is triggered if the
@@ -356,9 +370,10 @@ public class PushNotificationService extends Service {
             PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             Notification notification = new Notification.Builder(this)
-                    .setContentTitle(topic)
-                    .setContentText(message.toString())
+                    .setContentTitle(notification_title)
+                    .setContentText(notification_message)
                     .setSmallIcon(R.drawable.ic_ico_notify)
+                    .setStyle(new Notification.BigTextStyle().bigText(notification_message))
                     .setContentIntent(pIntent)
                     .setAutoCancel(true)
                     .setVibrate(vibration)

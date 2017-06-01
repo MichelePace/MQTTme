@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
     Hashtable<Integer, View> itemsView = new Hashtable<Integer, View>();
     Hashtable<String, Integer> topics = new Hashtable<String, Integer>();
-    Hashtable<String , Notification> notifications = new Hashtable<String, Notification>(); //the key "notifications" set on or off notifications
+    Hashtable<String , MyNotification> notifications = new Hashtable<String, MyNotification>(); //the key "notifications" sets on or off notifications
 
     EditText messageToSend;
 
@@ -193,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
                     mBound = true;
 
                     mService.setMainActivity(MainActivity.this);
+                    mService.setNotifications(notifications);
 
                     Vector<MyMessage> messages = mService.getMessages();
                     MyMessage mMessage;
@@ -322,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
                 //Intent cast Hashtable into HashMap, so it need recast
                 Serializable temp = data.getSerializableExtra("Notifications");
                 if(temp != null){
-                    notifications = new Hashtable<String, Notification>((HashMap<String, Notification>)temp);
+                    notifications = new Hashtable<String, MyNotification>((HashMap<String, MyNotification>)temp);
                 }
 
                 if(notifications.get("notifications").getNotify()){
@@ -330,6 +331,8 @@ public class MainActivity extends AppCompatActivity {
                 }else{
                     notify = false;
                 }
+
+                mService.setNotifications(notifications);
 
                 //Save settings on file
                 fileNotifications = new File(this.getFilesDir() + pathNotifications);
@@ -376,15 +379,6 @@ public class MainActivity extends AppCompatActivity {
                 initialized = true;
             }
 
-            if(fileNotifications.exists() && fileNotifications.canRead()) {
-
-                FileInputStream input = new FileInputStream(fileNotifications);
-                ObjectInputStream in = new ObjectInputStream(input);
-                Object obj = in.readObject();
-                notifications = (Hashtable<String, Notification>) obj;
-                in.close();
-            }
-
             if(fileSettings.exists() && fileSettings.canRead()) {
 
                 FileInputStream input = new FileInputStream(fileSettings);
@@ -394,6 +388,15 @@ public class MainActivity extends AppCompatActivity {
                 in.close();
 
                 brokerSetted = true;
+            }
+
+            if(fileNotifications.exists() && fileNotifications.canRead()) {
+
+                FileInputStream input = new FileInputStream(fileNotifications);
+                ObjectInputStream in = new ObjectInputStream(input);
+                Object obj = in.readObject();
+                notifications = (Hashtable<String, MyNotification>) obj;
+                in.close();
             }
 
         } catch (FileNotFoundException e) {

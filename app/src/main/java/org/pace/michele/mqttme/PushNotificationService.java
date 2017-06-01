@@ -46,7 +46,7 @@ public class PushNotificationService extends Service {
     private final String pathSettings = "/settingStatus";
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
-    Hashtable<String, Notification> notifications = new Hashtable<String, Notification>();
+    Hashtable<String, MyNotification> notifications = new Hashtable<String, MyNotification>();
 
     //Notifications
     private int notificationID = 0;
@@ -138,9 +138,10 @@ public class PushNotificationService extends Service {
      *
      * @param notif
      */
-    public void setNotifications(Hashtable<String, Notification> notif){
+    public void setNotifications(Hashtable<String, MyNotification> notif){
         notifications = notif;
     }
+
 
     /**
      *
@@ -158,6 +159,11 @@ public class PushNotificationService extends Service {
     }
 
 
+    /**
+     *
+     * @param topic
+     * @param QoS
+     */
     public void subscribe(String topic, int QoS){
 
         if(settings.connected) {
@@ -170,6 +176,10 @@ public class PushNotificationService extends Service {
     }
 
 
+    /**
+     *
+     * @param topic
+     */
     public void unsubscribe(String topic){
         if(settings.connected) {
             try {
@@ -370,27 +380,33 @@ public class PushNotificationService extends Service {
             notification_title = notif_number + " messages";
         }
 
-        notification_message.append(topic + ": " + message.toString() + "\n");
-
         if(!MainActivity.main_activity_running) {
 
-            // prepare intent which is triggered if the
-            // notification is selected
-            Intent intent = new Intent(this, MainActivity.class);
-            PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            if(notifications.containsKey(topic)) {
 
-            Notification notification = new Notification.Builder(this)
-                    .setContentTitle(notification_title)
-                    .setContentText(notification_message)
-                    .setSmallIcon(R.drawable.ic_ico_notify)
-                    .setStyle(new Notification.BigTextStyle().bigText(notification_message))
-                    .setContentIntent(pIntent)
-                    .setAutoCancel(true)
-                    .setVibrate(vibration)
-                    .setSound(ringtone).build();
+                if(notifications.get(topic).getNotify()) {
 
-            notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.notify(notificationID, notification);
+                    notification_message.append(topic + ": " + message.toString() + "\n");
+
+                    // prepare intent which is triggered if the
+                    // notification is selected
+                    Intent intent = new Intent(this, MainActivity.class);
+                    PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    Notification notification = new Notification.Builder(this)
+                            .setContentTitle(notification_title)
+                            .setContentText(notification_message)
+                            .setSmallIcon(R.drawable.ic_ico_notify)
+                            .setStyle(new Notification.BigTextStyle().bigText(notification_message))
+                            .setContentIntent(pIntent)
+                            .setAutoCancel(true)
+                            .setVibrate(vibration)
+                            .setSound(ringtone).build();
+
+                    notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    notificationManager.notify(notificationID, notification);
+                }
+            }
 
             MyMessage mMessage = new MyMessage(topic, message);
             messages.add(mMessage);

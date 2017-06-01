@@ -6,14 +6,14 @@ import java.io.Serializable;
  * Created by michele on 31/05/17.
  */
 
-public class Notification implements Serializable{
+public class MyNotification implements Serializable{
     static public int NOTIFICATION = 0;
     static public int ALARM = 1;
 
     private boolean notify;
     private int type;
 
-    Notification(boolean n, int t){
+    MyNotification(boolean n, int t){
         notify = n;
         type = t;
     }

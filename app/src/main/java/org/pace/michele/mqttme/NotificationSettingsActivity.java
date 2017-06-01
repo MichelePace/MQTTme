@@ -1,8 +1,6 @@
 package org.pace.michele.mqttme;
 
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -26,7 +24,7 @@ import java.util.HashMap;
 public class NotificationSettingsActivity extends AppCompatActivity {
 
     private Hashtable<String, Integer> topics = new Hashtable<String, Integer>();
-    private Hashtable<String, Notification> notifications = new Hashtable<String, Notification>();
+    private Hashtable<String, MyNotification> notifications = new Hashtable<String, MyNotification>();
     private boolean notify = false;
 
     private Hashtable<String, View> items = new Hashtable<String, View>();
@@ -42,12 +40,11 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         Serializable temp = intent.getSerializableExtra("Topics");
         if(temp != null){
             topics = new Hashtable<String, Integer>((HashMap<String, Integer>)temp);
-
         }
         temp = intent.getSerializableExtra("Notifications");
 
         if(temp != null) {
-            notifications = new Hashtable<String, Notification>((HashMap<String, Notification>) temp);
+            notifications = new Hashtable<String, MyNotification>((HashMap<String, MyNotification>) temp);
         }
 
         showOldSettings();
@@ -118,7 +115,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 
         }else{
 
-            notifications.put("notifications", new Notification(false, 0));
+            notifications.put("notifications", new MyNotification(false, 0));
 
             for(int i = 0; i < topics.size(); i++) {
                 item = inflater.inflate(R.layout.notification_setting_item, null);
@@ -179,7 +176,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         if(notifications.containsKey(key)) {
             notifications.get(key).setNotify(isChecked);
         }else{
-            notifications.put(key, new Notification(isChecked, 0));
+            notifications.put(key, new MyNotification(isChecked, 0));
         }
     }
 
@@ -193,7 +190,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         if(notifications.containsKey(key)) {
             notifications.get(key).setType(position);
         }else{
-            notifications.put(key, new Notification(false, position));
+            notifications.put(key, new MyNotification(false, position));
         }
     }
 

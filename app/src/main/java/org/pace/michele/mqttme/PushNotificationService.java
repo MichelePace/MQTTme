@@ -65,10 +65,6 @@ public class PushNotificationService extends Service {
     //List of messages arrived while in background
     private Vector<MyMessage> messages;
 
-
-    Timer timerObj;
-    TimerTask timerTaskObj;
-
     /**
      *
      */

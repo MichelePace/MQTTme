@@ -219,6 +219,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     *
+     * @param connected
+     */
     void clientConnection(boolean connected){
         if(connected){
             LinearLayout host = (LinearLayout)findViewById(R.id.host);
@@ -698,6 +702,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     *
+     * @param topic
+     * @param message
+     */
     void messageReceived(String topic, MqttMessage message){
         System.out.println("+++++++++++++++ item.size(): " + items.size() + " - Total items: " + totalItems);
         Enumeration<Integer> keys = items.keys();
@@ -1128,8 +1137,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         }
-
-
 
         return super.onOptionsItemSelected(item);
     }

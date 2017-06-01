@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -64,8 +63,7 @@ public class SettingConnectionActivity extends AppCompatActivity {
     @Override
     protected void onStop(){
         super.onStop();
-        Intent resultIntent = new Intent();
-        setResult(RESULT_BACK, resultIntent);
+        saveAndFinish();
         finish();
     }
 

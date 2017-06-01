@@ -1,7 +1,5 @@
 package org.pace.michele.mqttme;
 
-import android.view.View;
-
 import java.io.Serializable;
 
 /**

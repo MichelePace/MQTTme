@@ -46,6 +46,7 @@ public class PushNotificationService extends Service {
     private final String pathSettings = "/settingStatus";
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
+    Hashtable<String, Notification> notifications = new Hashtable<String, Notification>();
 
     //Notifications
     private int notificationID = 0;
@@ -135,6 +136,14 @@ public class PushNotificationService extends Service {
 
     /**
      *
+     * @param notif
+     */
+    public void setNotifications(Hashtable<String, Notification> notif){
+        notifications = notif;
+    }
+
+    /**
+     *
      * @param topic
      * @param payload
      * @param QoS
@@ -148,6 +157,7 @@ public class PushNotificationService extends Service {
         }
     }
 
+
     public void subscribe(String topic, int QoS){
 
         if(settings.connected) {
@@ -158,6 +168,7 @@ public class PushNotificationService extends Service {
             }
         }
     }
+
 
     public void unsubscribe(String topic){
         if(settings.connected) {

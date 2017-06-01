@@ -1,27 +1,21 @@
 package org.pace.michele.mqttme;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -33,6 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,30 +36,28 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Vector;
-
-import org.eclipse.paho.android.service.MqttAndroidClient;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
-import org.pace.michele.mqttme.MyItem;
-import org.eclipse.paho.client.mqttv3.*;
 
 public class MainActivity extends AppCompatActivity {
 
     File file;
     File fileSettings;
+    File fileNotifications;
     final String path = "/itemStatus";
     final String pathSettings = "/settingStatus";
+    final String pathNotifications = "notificationStatus";
 
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
-    private Hashtable<Integer, View> itemsView = new Hashtable<Integer, View>();
+    Hashtable<Integer, View> itemsView = new Hashtable<Integer, View>();
     Hashtable<String, Integer> topics = new Hashtable<String, Integer>();
+    Hashtable<String , Notification> notifications = new Hashtable<String, Notification>(); //the key "notifications" set on or off notifications
 
     EditText messageToSend;
-
-    boolean initialized = false;
 
     private int totalItems = 0;
 
@@ -74,14 +68,17 @@ public class MainActivity extends AppCompatActivity {
     static final int NEW_ITEM = 0;
     static final int MODIFY_ITEM = 1;
     static final int SERVER_SETTINGS = 2;
-
-    boolean brokerSetted = false;
-
-    static boolean main_activity_running = false;
+    static final int NOTIFICATION_SETTINGS = 3;
 
     ServiceConnection mConnection;
     PushNotificationService mService;
-    boolean mBound = false;
+
+    //Flags
+    boolean initialized = false;  //Indicates if layout has been initialized
+    boolean brokerSetted = false; //Indicates if broker parameters have been initialized
+    static boolean main_activity_running = false; //Indicates if MainActivity is running
+    boolean mBound = false; //Indicates if service has been bound
+    boolean notify = false; //Indicates if notifications are on
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -286,11 +283,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
 
-            case (SERVER_SETTINGS):
+            case (SERVER_SETTINGS): {
                 if (resultCode == ItemParametersActivity.RESULT_OK) {
                     settings = (Connection) data.getSerializableExtra("Connection");
 
-                    if(mBound){
+                    if (mBound) {
                         mService.setConnection(settings);
                         mService.initializeMQTT();
                         mService.mqtt_connect();
@@ -300,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
                     //Save settings on file
                     fileSettings = new File(this.getFilesDir() + pathSettings);
                     try {
-                        FileOutputStream output= new FileOutputStream(fileSettings);
+                        FileOutputStream output = new FileOutputStream(fileSettings);
                         ObjectOutputStream out = new ObjectOutputStream(output);
                         out.writeObject(settings);
                         out.flush();
@@ -318,6 +315,38 @@ public class MainActivity extends AppCompatActivity {
                             .setAction("Action", null).show();
                 }
                 break;
+            }
+
+            case (NOTIFICATION_SETTINGS): {
+
+                //Intent cast Hashtable into HashMap, so it need recast
+                Serializable temp = data.getSerializableExtra("Notifications");
+                if(temp != null){
+                    notifications = new Hashtable<String, Notification>((HashMap<String, Notification>)temp);
+                }
+
+                if(notifications.get("notifications").getNotify()){
+                    notify = true;
+                }else{
+                    notify = false;
+                }
+
+                //Save settings on file
+                fileNotifications = new File(this.getFilesDir() + pathNotifications);
+                try {
+                    FileOutputStream output = new FileOutputStream(fileNotifications);
+                    ObjectOutputStream out = new ObjectOutputStream(output);
+                    out.writeObject(notifications);
+                    out.flush();
+                    out.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            }
         }
     }
 
@@ -329,6 +358,7 @@ public class MainActivity extends AppCompatActivity {
 
         file = new File(this.getFilesDir() + path);
         fileSettings = new File(this.getFilesDir() + pathSettings);
+        fileNotifications = new File(this.getFilesDir() + pathNotifications);
         try {
             if(file.exists() && file.canRead()) {
 
@@ -344,6 +374,15 @@ public class MainActivity extends AppCompatActivity {
                         createNewItem(items.get(i));
                     }
                 initialized = true;
+            }
+
+            if(fileNotifications.exists() && fileNotifications.canRead()) {
+
+                FileInputStream input = new FileInputStream(fileNotifications);
+                ObjectInputStream in = new ObjectInputStream(input);
+                Object obj = in.readObject();
+                notifications = (Hashtable<String, Notification>) obj;
+                in.close();
             }
 
             if(fileSettings.exists() && fileSettings.canRead()) {
@@ -737,7 +776,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(itemDimension, itemDimension);
         params.setMargins(0,0,0,5);
 
-        LayoutInflater inflater_one_user = MainActivity.this.getLayoutInflater();
+        LayoutInflater inflater = MainActivity.this.getLayoutInflater();
         View item = null;
 
 
@@ -747,7 +786,7 @@ public class MainActivity extends AppCompatActivity {
 
         //IF TOGGLE_ITEM
         if(type == MyItem.TOGGLE_ITEM) {
-            item = inflater_one_user.inflate(R.layout.toggle_item, null);
+            item = inflater.inflate(R.layout.toggle_item, null);
             TextView itemName = (TextView) item.findViewById(R.id.name);
 
             itemName.setText(mi.getName());
@@ -758,7 +797,7 @@ public class MainActivity extends AppCompatActivity {
         }else if(type == MyItem.RANGE_ITEM){
 
             //IF RANGE_ITEM
-            item = inflater_one_user.inflate(R.layout.range_item, null);
+            item = inflater.inflate(R.layout.range_item, null);
             TextView itemName = (TextView) item.findViewById(R.id.name);
 
             itemName.setText(mi.getName());
@@ -769,7 +808,7 @@ public class MainActivity extends AppCompatActivity {
         }else if(type == MyItem.TEXT_ITEM){
 
             //IF TEXT_ITEM
-            item = inflater_one_user.inflate(R.layout.text_item, null);
+            item = inflater.inflate(R.layout.text_item, null);
             TextView itemName = (TextView) item.findViewById(R.id.name);
             TextView message = (TextView) item.findViewById(R.id.message);
 
@@ -1035,6 +1074,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unbindService(mConnection);
+        if(!notify){
+            Intent myIntent = new Intent(MainActivity.this, PushNotificationService.class);
+            MainActivity.this.stopService(myIntent);
+        }
     }
 
     @Override
@@ -1052,11 +1095,19 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_server_settings) {
 
             Intent myIntent = new Intent(MainActivity.this, SettingConnectionActivity.class);
             myIntent.putExtra("Connection", settings);
             MainActivity.this.startActivityForResult(myIntent, SERVER_SETTINGS);
+            return true;
+
+        }else if(id == R.id.action_notification_settings){
+
+            Intent myIntent = new Intent(MainActivity.this, NotificationSettingsActivity.class);
+            myIntent.putExtra("Topics", topics);
+            myIntent.putExtra("Notifications", notifications);
+            MainActivity.this.startActivityForResult(myIntent, NOTIFICATION_SETTINGS);
             return true;
 
         }else if (id == R.id.action_reconnect) {

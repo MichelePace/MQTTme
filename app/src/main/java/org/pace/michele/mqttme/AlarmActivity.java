@@ -3,17 +3,13 @@ package org.pace.michele.mqttme;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -28,6 +24,8 @@ import android.widget.TextView;
  */
 public class AlarmActivity extends AppCompatActivity {
 
+    private static final String TAG = "AlarmActivity";
+
     private long[] vibration = {100, 600, 800};
     private Uri ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
     Vibrator v;
@@ -41,10 +39,6 @@ public class AlarmActivity extends AppCompatActivity {
             stop(STOPPED_FROM_TIMER);
         }
     };
-
-    ServiceConnection mConnection;
-    private boolean mBound = false;
-    PushNotificationService mService;
 
     private String message = "";
     private String topic = "";
@@ -140,7 +134,6 @@ public class AlarmActivity extends AppCompatActivity {
                 mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        System.out.println("+++++++ON COMPLETITION LISTENER");
                         mp.start();
                     }
                 });

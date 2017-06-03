@@ -12,6 +12,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,6 +44,8 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TAG = "MainActivity";
 
     File file;
     File fileSettings;
@@ -163,9 +166,9 @@ public class MainActivity extends AppCompatActivity {
      */
     void startAndBoundService(){
         if(isMyServiceRunning(PushNotificationService.class)){
-            System.out.println("++++++Service running");
+            Log.v(TAG, " +++ Service running");
         }else{
-            System.out.println("++++++Service not running");
+            Log.v(TAG, " +++ Service not running");
             Intent myIntent = new Intent(MainActivity.this, PushNotificationService.class);
             MainActivity.this.startService(myIntent);
         }
@@ -201,13 +204,13 @@ public class MainActivity extends AppCompatActivity {
                         mMessage = messages.get(i);
                         messageReceived(mMessage.getTopic(), mMessage.getMessage());
                     }
-                    System.out.println(" +++ Bound to service");
+                    Log.v(TAG, " +++ Bound to service");
                 }
 
                 @Override
                 public void onServiceDisconnected(ComponentName arg0) {
                     mBound = false;
-                    System.out.println(" +++ Not bound to service");
+                    Log.v(TAG, " +++ Not bound to service");
                 }
             };
 
@@ -246,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
                     MyItem newItem = (MyItem) data.getSerializableExtra("Item");
                     createNewItem(newItem);
                 } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
-                    System.out.println("User pressed back button");
+                    Log.v(TAG, "User pressed back button");
                 } else {
                     Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -280,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
-                    System.out.println("User pressed back button");
+                    Log.v(TAG, "User pressed back button");
                 } else {
                     Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -314,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                 } else if (resultCode == ItemParametersActivity.RESULT_BACK) {
-                    System.out.println("User pressed back button");
+                    Log.v(TAG, "User pressed back button");
                 } else {
                     Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
@@ -714,7 +717,6 @@ public class MainActivity extends AppCompatActivity {
      * @param message
      */
     void messageReceived(String topic, MqttMessage message){
-        System.out.println("+++++++++++++++ item.size(): " + items.size() + " - Total items: " + totalItems);
         Enumeration<Integer> keys = items.keys();
         MyItem mi;
         while (keys.hasMoreElements()){

@@ -11,6 +11,8 @@ import android.widget.EditText;
 
 public class SettingConnectionActivity extends AppCompatActivity {
 
+    private static final String TAG = "SettingConnectionActivity";
+
     public Connection settings = new Connection();
     public Connection settingsIntent;
 

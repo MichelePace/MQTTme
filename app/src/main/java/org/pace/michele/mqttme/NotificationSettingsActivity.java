@@ -23,6 +23,8 @@ import java.util.HashMap;
 
 public class NotificationSettingsActivity extends AppCompatActivity {
 
+    private static final String TAG = "NotificationSettingsActivity";
+
     private Hashtable<String, Integer> topics = new Hashtable<String, Integer>();
     private Hashtable<String, MyNotification> notifications = new Hashtable<String, MyNotification>();
     private boolean notify = false;

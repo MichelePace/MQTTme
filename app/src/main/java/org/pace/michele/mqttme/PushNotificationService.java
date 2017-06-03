@@ -1,12 +1,9 @@
 package org.pace.michele.mqttme;
 
-import android.app.AlarmManager;
-import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
@@ -14,7 +11,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -33,11 +30,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
 
 public class PushNotificationService extends Service {
+
+    private static final String TAG = "PushNotificationService";
 
     //MQTT
     private MqttAndroidClient client;
@@ -94,7 +91,7 @@ public class PushNotificationService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        System.out.println(" ++++++++ onBind() called");
+        Log.v(TAG, "+++ onBind() called");
         return mBinder;
     }
 
@@ -102,7 +99,7 @@ public class PushNotificationService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         super.onUnbind(intent);
-        System.out.println(" ++++++++ onUnbind() called");
+        Log.v(TAG, " +++ onUnbind() called");
         return true;
     }
 
@@ -201,7 +198,7 @@ public class PushNotificationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        System.out.println(" +++ Service started");
+        Log.v(TAG, " +++ Service started");
 
         settings = new Connection();
 
@@ -276,7 +273,7 @@ public class PushNotificationService extends Service {
         client.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable cause) {
-                System.out.println("Connection lost");
+                Log.v(TAG, "Connection lost");
                 if(cause != null) {
                     cause.printStackTrace();
                 }
@@ -285,7 +282,7 @@ public class PushNotificationService extends Service {
 
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
-                System.out.println(" +++ Topic: "+topic+", Message: "+message.toString());
+                Log.i(TAG, " +++ Topic: "+topic+", Message: "+message.toString());
                 messageReceived(topic, message);
             }
 
@@ -316,7 +313,7 @@ public class PushNotificationService extends Service {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
 
-                    System.out.println(" +++ Connected");
+                    Log.v(TAG, " +++ Connected");
 
                     //Subscribe to all topics
                     Enumeration<MyItem> e;
@@ -344,7 +341,7 @@ public class PushNotificationService extends Service {
                         timerObj.purge();
                     }*/
 
-                    System.out.println(" +++ Subscribed");
+                    Log.i(TAG, " +++ Subscribed");
 
                     if(MainActivity.main_activity_running && mainActivity != null){
                         mainActivity.clientConnection(true);
@@ -359,7 +356,7 @@ public class PushNotificationService extends Service {
                         mainActivity.clientConnection(false);
                     }
 
-                    System.out.println(" +++ Not connected ");
+                    Log.v(TAG, " +++ Not connected ");
 
                     /*timerObj = new Timer();
                     timerTaskObj = new TimerTask() {
@@ -450,6 +447,6 @@ public class PushNotificationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        System.out.println(" +++ Service stopped");
+        Log.v(TAG, " +++ Service stopped");
     }
 }

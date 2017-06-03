@@ -19,6 +19,8 @@ import android.widget.TextView;
 
 public class ItemParametersActivity extends AppCompatActivity {
 
+    private static final String TAG = "ItemParametersActivity";
+
     final static int RESULT_BACK = 0;
     final static int RESULT_OK = 1;
 

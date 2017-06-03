@@ -341,7 +341,7 @@ public class PushNotificationService extends Service {
                         timerObj.purge();
                     }*/
 
-                    Log.i(TAG, " +++ Subscribed");
+                    Log.v(TAG, " +++ Subscribed");
 
                     if(MainActivity.main_activity_running && mainActivity != null){
                         mainActivity.clientConnection(true);

@@ -1,14 +1,20 @@
 package org.pace.michele.mqttme;
 
+import android.app.AlarmManager;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.support.v4.app.NotificationCompat;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
@@ -40,10 +46,12 @@ public class PushNotificationService extends Service {
     private boolean brokerSetted = false;
 
     //File settings
-    File file;
+    private File file;
     private File fileSettings;
-    final String path = "/itemStatus";
+    private File fileNotifications;
+    private final String path = "/itemStatus";
     private final String pathSettings = "/settingStatus";
+    private final String pathNotifications = "notificationStatus";
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
     Hashtable<String, MyNotification> notifications = new Hashtable<String, MyNotification>();
@@ -55,6 +63,9 @@ public class PushNotificationService extends Service {
     private NotificationManager notificationManager;
     private int notif_number = 0;
     StringBuffer notification_message = new StringBuffer();
+
+    //Notification alarm
+    private PowerManager.WakeLock mWakelock;
 
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
@@ -210,6 +221,7 @@ public class PushNotificationService extends Service {
 
         file = new File(this.getFilesDir() + path);
         fileSettings = new File(this.getFilesDir() + pathSettings);
+        fileNotifications = new File(this.getFilesDir() + pathNotifications);
         try {
 
             if(file.exists() && file.canRead()) {
@@ -232,6 +244,15 @@ public class PushNotificationService extends Service {
                 in.close();
 
                 brokerSetted = true;
+            }
+
+            if(fileNotifications.exists() && fileNotifications.canRead()) {
+
+                FileInputStream input = new FileInputStream(fileNotifications);
+                ObjectInputStream in = new ObjectInputStream(input);
+                Object obj = in.readObject();
+                notifications = (Hashtable<String, MyNotification>) obj;
+                in.close();
             }
 
         } catch (FileNotFoundException e) {
@@ -368,19 +389,22 @@ public class PushNotificationService extends Service {
     void messageReceived(String topic, MqttMessage message){
 
         String notification_title;
-        notif_number++;
 
-        if(notif_number == 1) {
-            notification_title = "1 message";
-        }else{
-            notification_title = notif_number + " messages";
-        }
+        MyMessage mMessage = new MyMessage(topic, message);
 
         if(!MainActivity.main_activity_running) {
 
             if(notifications.containsKey(topic)) {
 
-                if(notifications.get(topic).getNotify()) {
+                if(notifications.get(topic).getNotify() && notifications.get(topic).getType() == MyNotification.NOTIFICATION) {
+
+                    notif_number++;
+
+                    if(notif_number == 1) {
+                        notification_title = "1 message";
+                    }else{
+                        notification_title = notif_number + " messages";
+                    }
 
                     notification_message.append(topic + ": " + message.toString() + "\n");
 
@@ -401,10 +425,18 @@ public class PushNotificationService extends Service {
 
                     notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                     notificationManager.notify(notificationID, notification);
+
+                }else if(notifications.get(topic).getNotify() && notifications.get(topic).getType() == MyNotification.ALARM){
+
+                    this.mWakelock = ((PowerManager) this.getSystemService(Context.POWER_SERVICE)).newWakeLock(805306394/* | PowerManager.ON_AFTER_RELEASE */, "wakelock");
+                    this.mWakelock.acquire();
+
+                    Intent intent = new Intent(this, AlarmActivity.class);
+                    intent.putExtra("Topic", topic);
+                    intent.putExtra("Message", message.toString());
+                    this.startActivity(intent);
                 }
             }
-
-            MyMessage mMessage = new MyMessage(topic, message);
             messages.add(mMessage);
 
         }else{

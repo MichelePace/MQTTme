@@ -401,6 +401,12 @@ public class MainActivity extends AppCompatActivity {
                 Object obj = in.readObject();
                 notifications = (Hashtable<String, MyNotification>) obj;
                 in.close();
+
+                if(notifications.containsKey("notifications")) {
+                    if (notifications.get("notifications").getNotify()) {
+                        notify = true;
+                    }
+                }
             }
 
         } catch (FileNotFoundException e) {
@@ -1084,12 +1090,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        unbindService(mConnection);
+
         if(!notify){
             Intent myIntent = new Intent(MainActivity.this, PushNotificationService.class);
             MainActivity.this.stopService(myIntent);
         }
+        unbindService(mConnection);
+        super.onDestroy();
     }
 
     @Override

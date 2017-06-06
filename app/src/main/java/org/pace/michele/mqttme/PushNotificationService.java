@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.TimerTask;
 import java.util.Vector;
 
 public class PushNotificationService extends Service {
@@ -72,6 +74,15 @@ public class PushNotificationService extends Service {
 
     //List of messages arrived while in background
     private Vector<MyMessage> messages;
+
+    private Handler handler;
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            mqtt_connect();
+            handler.postDelayed(this, 300000); //5 minutes
+        }
+    };
 
     /**
      *
@@ -208,6 +219,9 @@ public class PushNotificationService extends Service {
             initializeMQTT();
             mqtt_connect();
         }
+
+        handler = new Handler();
+        handler.postDelayed(runnable, 300000);
     }
 
 
@@ -293,11 +307,11 @@ public class PushNotificationService extends Service {
         });
 
         option = new MqttConnectOptions();
-        option.setCleanSession(false);
+        option.setCleanSession(true);
         option.setUserName(settings.getUsername());
         option.setPassword(settings.getPassword().toCharArray());
         option.setAutomaticReconnect(true);
-        option.setConnectionTimeout(30);
+        option.setConnectionTimeout(600);
     }
 
 
@@ -306,74 +320,64 @@ public class PushNotificationService extends Service {
      */
     void mqtt_connect(){
 
-        System.out.println("--Trying to connect");
+        if(!client.isConnected()) {
 
-        try {
-            client.connect(option, this.getApplicationContext(), new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
+            Log.v(TAG, " --Trying to connect");
 
-                    Log.v(TAG, " +++ Connected");
+            try {
+                client.connect(option, this.getApplicationContext(), new IMqttActionListener() {
+                    @Override
+                    public void onSuccess(IMqttToken asyncActionToken) {
 
-                    //Subscribe to all topics
-                    Enumeration<MyItem> e;
-                    MyItem mi;
+                        Log.v(TAG, " +++ Connected");
 
-                    if(mainActivity != null) e = mainActivity.items.elements();
-                    else e = items.elements();
+                        //Subscribe to all topics
+                        Enumeration<MyItem> e;
+                        MyItem mi;
 
-                    while (e.hasMoreElements()) {
+                        if (mainActivity != null) e = mainActivity.items.elements();
+                        else e = items.elements();
 
-                        mi = e.nextElement();
+                        while (e.hasMoreElements()) {
 
-                        try {
-                            client.subscribe(mi.getSubTopic(), mi.getQoS());
-                        } catch (MqttException e1) {
-                            e1.printStackTrace();
+                            mi = e.nextElement();
+
+                            try {
+                                client.subscribe(mi.getSubTopic(), mi.getQoS());
+                            } catch (MqttException e1) {
+                                e1.printStackTrace();
+                            }
+                        }
+
+
+                        settings.connected = true;
+
+                        Log.v(TAG, " +++ Subscribed");
+
+                        if (MainActivity.main_activity_running && mainActivity != null) {
+                            mainActivity.clientConnection(true);
                         }
                     }
 
+                    @Override
+                    public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                        settings.connected = false;
 
-                    settings.connected = true;
-
-                    /*if(timerObj != null) {
-                        timerObj.cancel();
-                        timerObj.purge();
-                    }*/
-
-                    Log.v(TAG, " +++ Subscribed");
-
-                    if(MainActivity.main_activity_running && mainActivity != null){
-                        mainActivity.clientConnection(true);
-                    }
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                    settings.connected = false;
-
-                    if(MainActivity.main_activity_running && mainActivity != null){
-                        mainActivity.clientConnection(false);
-                    }
-
-                    Log.v(TAG, " +++ Not connected ");
-
-                    /*timerObj = new Timer();
-                    timerTaskObj = new TimerTask() {
-                        public void run() {
-                            mqtt_connect();
+                        if (MainActivity.main_activity_running && mainActivity != null) {
+                            mainActivity.clientConnection(false);
                         }
-                    };
-                    timerObj.schedule(timerTaskObj, 0, 10000);*/
 
-                    System.out.println(exception.getCause());
-                    System.out.println(exception.getMessage());
-                    exception.printStackTrace();
-                }
-            });
+                        Log.v(TAG, " +++ Not connected ");
 
-        } catch (MqttException e) {
-            e.printStackTrace();
+                        System.out.println(exception.getCause());
+                        System.out.println(exception.getMessage());
+                        exception.printStackTrace();
+                    }
+                });
+
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -446,6 +450,9 @@ public class PushNotificationService extends Service {
 
     @Override
     public void onDestroy() {
+        if(handler != null) {
+            handler.removeCallbacks(runnable);
+        }
         super.onDestroy();
         Log.v(TAG, " +++ Service stopped");
     }

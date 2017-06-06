@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.Space;
@@ -88,6 +89,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
                 if(notifications.containsKey(key)) {
                     ((Switch) item.findViewById(R.id.n_switch)).setChecked(notifications.get(key).getNotify());
                     ((Spinner) item.findViewById(R.id.spinner)).setSelection(notifications.get(key).getType());
+                    ((CheckBox) item.findViewById(R.id.checkbox_sm)).setChecked(notifications.get(key).getNotShowSame());
                 }
 
                 ((Switch)item.findViewById(R.id.n_switch)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -107,6 +109,13 @@ public class NotificationSettingsActivity extends AppCompatActivity {
                     public void onNothingSelected(AdapterView<?> parent) { }
                 });
 
+                ((CheckBox)item.findViewById(R.id.checkbox_sm)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        changeNotShowSame(isChecked, key);
+                    }
+                });
+
                 Space space = new Space(this);
                 space.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 40));
 
@@ -117,7 +126,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
 
         }else{
 
-            notifications.put("notifications", new MyNotification(false, 0));
+            notifications.put("notifications", new MyNotification(false, 0, false));
 
             for(int i = 0; i < topics.size(); i++) {
                 item = inflater.inflate(R.layout.notification_setting_item, null);
@@ -178,7 +187,7 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         if(notifications.containsKey(key)) {
             notifications.get(key).setNotify(isChecked);
         }else{
-            notifications.put(key, new MyNotification(isChecked, 0));
+            notifications.put(key, new MyNotification(isChecked, 0, false));
         }
     }
 
@@ -192,7 +201,21 @@ public class NotificationSettingsActivity extends AppCompatActivity {
         if(notifications.containsKey(key)) {
             notifications.get(key).setType(position);
         }else{
-            notifications.put(key, new MyNotification(false, position));
+            notifications.put(key, new MyNotification(false, position, false));
+        }
+    }
+
+
+    /**
+     *
+     * @param isChecked
+     * @param key
+     */
+    private void changeNotShowSame(boolean isChecked, String key){
+        if(notifications.containsKey(key)) {
+            notifications.get(key).setNotShowSame(isChecked);
+        }else{
+            notifications.put(key, new MyNotification(false, 0, isChecked));
         }
     }
 

@@ -12,19 +12,19 @@ public class MyNotification implements Serializable{
 
     private boolean notify;
     private int type;
+    private boolean notShowSame;
 
-    MyNotification(boolean n, int t){
+    MyNotification(boolean n, int t, boolean nts){
         notify = n;
         type = t;
+        notShowSame = nts;
     }
 
-    public boolean getNotify(){
-        return  notify;
-    }
+    public boolean getNotify(){ return  notify; }
 
-    public int getType(){
-        return type;
-    }
+    public int getType(){ return type; }
+
+    public boolean getNotShowSame(){ return notShowSame; }
 
     public void setNotify(boolean n){
         notify = n;
@@ -36,5 +36,9 @@ public class MyNotification implements Serializable{
         }else{
             type = t;
         }
+    }
+
+    public void setNotShowSame(boolean nts){
+        notShowSame = nts;
     }
 }

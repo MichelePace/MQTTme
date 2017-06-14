@@ -36,11 +36,13 @@
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
         <activity
+            android:excludeFromRecents="true"
             android:name=".ItemParametersActivity"
             android:label="@string/title_activity_item_parameters"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:excludeFromRecents="true"
             android:name=".SettingConnectionActivity"
             android:label="@string/title_activity_setting_connection"
             android:screenOrientation="portrait"
@@ -52,12 +54,14 @@
             android:exported="true" />
 
         <activity
+            android:excludeFromRecents="true"
             android:name=".NotificationSettingsActivity"
             android:label="@string/title_activity_notification_settings"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".AlarmActivity"
+            android:excludeFromRecents="true"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_alarm"
             android:theme="@style/FullscreenTheme"></activity>

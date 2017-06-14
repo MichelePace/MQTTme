@@ -27,8 +27,10 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.TimerTask;
@@ -48,12 +50,15 @@ public class PushNotificationService extends Service {
     private File file;
     private File fileSettings;
     private File fileNotifications;
+    private File fileLastMessages;
     private final String path = "/itemStatus";
     private final String pathSettings = "/settingStatus";
     private final String pathNotifications = "notificationStatus";
+    private final String pathLastMessages = "lastMessages";
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
     Hashtable<String, MyNotification> notifications = new Hashtable<String, MyNotification>();
+    Hashtable<String, String> lastMessages = new Hashtable<String, String>();
 
     //Notifications
     private int notificationID = 0;
@@ -83,8 +88,6 @@ public class PushNotificationService extends Service {
             handler.postDelayed(this, 300000); //5 minutes
         }
     };
-
-    private String last_message = "";
 
     /**
      *
@@ -235,6 +238,8 @@ public class PushNotificationService extends Service {
         file = new File(this.getFilesDir() + path);
         fileSettings = new File(this.getFilesDir() + pathSettings);
         fileNotifications = new File(this.getFilesDir() + pathNotifications);
+        fileLastMessages = new File(this.getFilesDir() + pathLastMessages);
+
         try {
 
             if(file.exists() && file.canRead()) {
@@ -265,6 +270,15 @@ public class PushNotificationService extends Service {
                 ObjectInputStream in = new ObjectInputStream(input);
                 Object obj = in.readObject();
                 notifications = (Hashtable<String, MyNotification>) obj;
+                in.close();
+            }
+
+            if(fileLastMessages.exists() && fileLastMessages.canRead()) {
+
+                FileInputStream input = new FileInputStream(fileLastMessages);
+                ObjectInputStream in = new ObjectInputStream(input);
+                Object obj = in.readObject();
+                lastMessages = (Hashtable<String, String>) obj;
                 in.close();
             }
 
@@ -404,11 +418,18 @@ public class PushNotificationService extends Service {
                     boolean ok_notify = true;
 
                     if(notifications.get(topic).getNotShowSame()) {
-                        if(last_message.equals(message.toString()) && message.isRetained()){
-                            ok_notify = false;
-                            Log.i(TAG, " +++ Not duplicated");
+
+                        if(lastMessages.containsKey(topic) && message.isRetained()){
+
+                            if(lastMessages.get(topic).equals(message.toString())){
+                                ok_notify = false;
+                                Log.i(TAG, " +++ Duplicated");
+                            }else{
+                                Log.i(TAG, " +++ Not duplicated");
+                            }
+
                         }else{
-                            Log.i(TAG, " +++ Duplicated");
+                            Log.i(TAG, " +++ Not duplicated");
                         }
                     }
 
@@ -461,7 +482,7 @@ public class PushNotificationService extends Service {
             }
         }
 
-        last_message = message.toString();
+        lastMessages.put(topic, message.toString());
     }
 
 
@@ -470,6 +491,27 @@ public class PushNotificationService extends Service {
         if(handler != null) {
             handler.removeCallbacks(runnable);
         }
+
+        fileLastMessages = new File(this.getFilesDir() + pathLastMessages);
+
+        try {
+
+            if(fileLastMessages.exists() && fileLastMessages.canRead()) {
+
+                FileOutputStream output= new FileOutputStream(fileLastMessages);
+                ObjectOutputStream out = new ObjectOutputStream(output);
+                out.writeObject(lastMessages);
+                out.flush();
+                out.close();
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         super.onDestroy();
         Log.v(TAG, " +++ Service stopped");
     }

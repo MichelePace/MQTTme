@@ -483,6 +483,20 @@ public class PushNotificationService extends Service {
         }
 
         lastMessages.put(topic, message.toString());
+
+        fileLastMessages = new File(this.getFilesDir() + pathLastMessages);
+
+        try {
+            FileOutputStream output= new FileOutputStream(fileLastMessages);
+            ObjectOutputStream out = new ObjectOutputStream(output);
+            out.writeObject(lastMessages);
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -491,26 +505,6 @@ public class PushNotificationService extends Service {
         if(handler != null) {
             handler.removeCallbacks(runnable);
         }
-
-        fileLastMessages = new File(this.getFilesDir() + pathLastMessages);
-
-        try {
-
-            if(fileLastMessages.exists() && fileLastMessages.canRead()) {
-
-                FileOutputStream output= new FileOutputStream(fileLastMessages);
-                ObjectOutputStream out = new ObjectOutputStream(output);
-                out.writeObject(lastMessages);
-                out.flush();
-                out.close();
-            }
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
 
         super.onDestroy();
         Log.v(TAG, " +++ Service stopped");

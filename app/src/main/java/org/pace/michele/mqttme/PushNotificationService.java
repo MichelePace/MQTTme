@@ -84,6 +84,8 @@ public class PushNotificationService extends Service {
         }
     };
 
+    private String last_message = "";
+
     /**
      *
      */
@@ -320,7 +322,7 @@ public class PushNotificationService extends Service {
      */
     void mqtt_connect(){
 
-        if(!client.isConnected()) {
+        //if(!client.isConnected()) {
 
             Log.v(TAG, " --Trying to connect");
 
@@ -378,7 +380,7 @@ public class PushNotificationService extends Service {
             } catch (MqttException e) {
                 e.printStackTrace();
             }
-        }
+       // }
     }
 
 
@@ -399,33 +401,46 @@ public class PushNotificationService extends Service {
 
                 if(notifications.get(topic).getNotify() && notifications.get(topic).getType() == MyNotification.NOTIFICATION) {
 
-                    notif_number++;
+                    boolean ok_notify = true;
 
-                    if(notif_number == 1) {
-                        notification_title = "1 message";
-                    }else{
-                        notification_title = notif_number + " messages";
+                    if(notifications.get(topic).getNotShowSame()) {
+                        if(last_message.equals(message.toString()) && message.isRetained()){
+                            ok_notify = false;
+                            Log.i(TAG, " +++ Not duplicated");
+                        }else{
+                            Log.i(TAG, " +++ Duplicated");
+                        }
                     }
 
-                    notification_message.append(topic + ": " + message.toString() + "\n");
+                    if(ok_notify){
+                        notif_number++;
 
-                    // prepare intent which is triggered if the
-                    // notification is selected
-                    Intent intent = new Intent(this, MainActivity.class);
-                    PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        if (notif_number == 1) {
+                            notification_title = "1 message";
+                        } else {
+                            notification_title = notif_number + " messages";
+                        }
 
-                    Notification notification = new Notification.Builder(this)
-                            .setContentTitle(notification_title)
-                            .setContentText(notification_message)
-                            .setSmallIcon(R.drawable.ic_ico_notify)
-                            .setStyle(new Notification.BigTextStyle().bigText(notification_message))
-                            .setContentIntent(pIntent)
-                            .setAutoCancel(true)
-                            .setVibrate(vibration)
-                            .setSound(ringtone).build();
+                        notification_message.append(topic + ": " + message.toString() + "\n");
 
-                    notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                    notificationManager.notify(notificationID, notification);
+                        // prepare intent which is triggered if the
+                        // notification is selected
+                        Intent intent = new Intent(this, MainActivity.class);
+                        PendingIntent pIntent = PendingIntent.getActivity(this, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        Notification notification = new Notification.Builder(this)
+                                .setContentTitle(notification_title)
+                                .setContentText(notification_message)
+                                .setSmallIcon(R.drawable.ic_ico_notify)
+                                .setStyle(new Notification.BigTextStyle().bigText(notification_message))
+                                .setContentIntent(pIntent)
+                                .setAutoCancel(true)
+                                .setVibrate(vibration)
+                                .setSound(ringtone).build();
+
+                        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                        notificationManager.notify(notificationID, notification);
+                    }
 
                 }else if(notifications.get(topic).getNotify() && notifications.get(topic).getType() == MyNotification.ALARM){
 
@@ -445,6 +460,8 @@ public class PushNotificationService extends Service {
                 mainActivity.messageReceived(topic, message);
             }
         }
+
+        last_message = message.toString();
     }
 
 

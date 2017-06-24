@@ -210,6 +210,12 @@ public class PushNotificationService extends Service {
         }
     }
 
+    /**
+     *
+     */
+    public boolean isConnected(){
+        return client.isConnected();
+    }
 
     @Override
     public void onCreate() {
@@ -336,7 +342,7 @@ public class PushNotificationService extends Service {
      */
     void mqtt_connect(){
 
-        //if(!client.isConnected()) {
+        if(!client.isConnected()) {
 
             Log.v(TAG, " --Trying to connect");
 
@@ -394,7 +400,11 @@ public class PushNotificationService extends Service {
             } catch (MqttException e) {
                 e.printStackTrace();
             }
-       // }
+        }else{
+            if (MainActivity.main_activity_running && mainActivity != null) {
+                mainActivity.clientConnection(true);
+            }
+        }
     }
 
 
@@ -417,6 +427,15 @@ public class PushNotificationService extends Service {
 
                     boolean ok_notify = true;
 
+                    int pp = lastMessages.size();
+                    String p = ""+pp;
+
+                    try {
+                        client.publish("/debug", p.getBytes(), 1, true);
+                    } catch (MqttException e) {
+                        e.printStackTrace();
+                    }
+
                     if(notifications.get(topic).getNotShowSame()) {
 
                         if(lastMessages.containsKey(topic) && message.isRetained()){
@@ -424,8 +443,18 @@ public class PushNotificationService extends Service {
                             if(lastMessages.get(topic).equals(message.toString())){
                                 ok_notify = false;
                                 Log.i(TAG, " +++ Duplicated");
+                                try {
+                                    client.publish("/debug", "dup".getBytes(), 1, true);
+                                } catch (MqttException e) {
+                                    e.printStackTrace();
+                                }
                             }else{
                                 Log.i(TAG, " +++ Not duplicated");
+                                try {
+                                    client.publish("/debug", "Not".getBytes(), 1, true);
+                                } catch (MqttException e) {
+                                    e.printStackTrace();
+                                }
                             }
 
                         }else{

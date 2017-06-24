@@ -431,19 +431,24 @@ public class MainActivity extends AppCompatActivity {
      */
     void togglePressed(int key, boolean isChecked){
 
-        MyItem mi = items.get(key);
-        String topic = mi.getPubTopic();
-        boolean retained = mi.getRetained();
-        int qos = mi.getQoS();
-
-        String message;
-        if(isChecked) message = mi.getPressed();
-        else message = mi.getUnpressed();
-
-        byte[] payload = message.getBytes();
-
         if(mBound){
-            mService.publish(topic, payload, qos, retained);
+            if(mService.isConnected()) {
+
+                MyItem mi = items.get(key);
+                String topic = mi.getPubTopic();
+                boolean retained = mi.getRetained();
+                int qos = mi.getQoS();
+
+                String message;
+                if(isChecked) message = mi.getPressed();
+                else message = mi.getUnpressed();
+
+                byte[] payload = message.getBytes();
+                mService.publish(topic, payload, qos, retained);
+
+            }else{
+                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
+            }
         }else{
             Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
         }
@@ -533,23 +538,28 @@ public class MainActivity extends AppCompatActivity {
      */
 
     void buttonSetClicked(int key){
-        MyItem mi = items.get(key);
-        String topic = mi.getPubTopic();
-        boolean retained = mi.getRetained();
-        int qos = mi.getQoS();
-
-        View item = itemsView.get(key);
-        TextView t = (TextView) item.findViewById(R.id.progress);
-        String message = t.getText().toString();
-
-        byte[] payload = message.getBytes();
 
         if(mBound){
-            mService.publish(topic, payload, qos, retained);
+            if(mService.isConnected()) {
+
+                MyItem mi = items.get(key);
+                String topic = mi.getPubTopic();
+                boolean retained = mi.getRetained();
+                int qos = mi.getQoS();
+
+                View item = itemsView.get(key);
+                TextView t = (TextView) item.findViewById(R.id.progress);
+                String message = t.getText().toString();
+
+                byte[] payload = message.getBytes();
+                mService.publish(topic, payload, qos, retained);
+
+            }else {
+                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
+            }
         }else{
             Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
         }
-
     }
 
 
@@ -606,37 +616,45 @@ public class MainActivity extends AppCompatActivity {
      * @param key
      */
     void messageClicked(int key){
-        final Dialog d = new Dialog(this);
-        d.setContentView(R.layout.message_dialog);
-        d.setCancelable(true);
+        if(mBound) {
+            if (mService.isConnected()) {
 
-        d.show();
+                final Dialog d = new Dialog(this);
+                d.setContentView(R.layout.message_dialog);
+                d.setCancelable(true);
 
-        final int p = key;
+                d.show();
 
-        messageToSend = (EditText) d.findViewById(R.id.message);
+                final int p = key;
 
-        Button send = (Button) d.findViewById(R.id.send);
-        send.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
+                messageToSend = (EditText) d.findViewById(R.id.message);
 
-                // Dismiss keyboard
-                EditText e = (EditText) d.findViewById(R.id.message);
+                Button send = (Button) d.findViewById(R.id.send);
+                send.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        // Dismiss keyboard
+                        EditText e = (EditText) d.findViewById(R.id.message);
+                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(e.getWindowToken(), 0);
+
+                        sendText(p);
+                        d.dismiss();
+                    }
+                });
+                d.show();
+
+                // Show keyboard
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(e.getWindowToken(), 0);
+                imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 
-                sendText(p);
-                d.dismiss();
+            } else {
+                Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
             }
-        });
-        d.show();
-
-        // Show keyboard
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        }else{
+            Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
+        }
     }
 
 

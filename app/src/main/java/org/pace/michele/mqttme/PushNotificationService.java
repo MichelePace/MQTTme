@@ -422,10 +422,9 @@ public class PushNotificationService extends Service {
         if(!MainActivity.main_activity_running) {
 
             if(notifications.containsKey(topic)) {
+                boolean ok_notify = true;
 
                 if(notifications.get(topic).getNotify() && notifications.get(topic).getType() == MyNotification.NOTIFICATION) {
-
-                    boolean ok_notify = true;
 
                     int pp = lastMessages.size();
                     String p = ""+pp;
@@ -443,22 +442,7 @@ public class PushNotificationService extends Service {
                             if(lastMessages.get(topic).equals(message.toString())){
                                 ok_notify = false;
                                 Log.i(TAG, " +++ Duplicated");
-                                try {
-                                    client.publish("/debug", "dup".getBytes(), 1, true);
-                                } catch (MqttException e) {
-                                    e.printStackTrace();
-                                }
-                            }else{
-                                Log.i(TAG, " +++ Not duplicated");
-                                try {
-                                    client.publish("/debug", "Not".getBytes(), 1, true);
-                                } catch (MqttException e) {
-                                    e.printStackTrace();
-                                }
                             }
-
-                        }else{
-                            Log.i(TAG, " +++ Not duplicated");
                         }
                     }
 
@@ -494,13 +478,27 @@ public class PushNotificationService extends Service {
 
                 }else if(notifications.get(topic).getNotify() && notifications.get(topic).getType() == MyNotification.ALARM){
 
-                    this.mWakelock = ((PowerManager) this.getSystemService(Context.POWER_SERVICE)).newWakeLock(805306394/* | PowerManager.ON_AFTER_RELEASE */, "wakelock");
-                    this.mWakelock.acquire();
+                    if(notifications.get(topic).getNotShowSame()) {
 
-                    Intent intent = new Intent(this, AlarmActivity.class);
-                    intent.putExtra("Topic", topic);
-                    intent.putExtra("Message", message.toString());
-                    this.startActivity(intent);
+                        if(lastMessages.containsKey(topic) && message.isRetained()){
+
+                            if(lastMessages.get(topic).equals(message.toString())){
+                                ok_notify = false;
+                                Log.i(TAG, " +++ Duplicated");
+                            }
+                        }
+                    }
+
+                    if(ok_notify) {
+
+                        this.mWakelock = ((PowerManager) this.getSystemService(Context.POWER_SERVICE)).newWakeLock(805306394/* | PowerManager.ON_AFTER_RELEASE */, "wakelock");
+                        this.mWakelock.acquire();
+
+                        Intent intent = new Intent(this, AlarmActivity.class);
+                        intent.putExtra("Topic", topic);
+                        intent.putExtra("Message", message.toString());
+                        this.startActivity(intent);
+                    }
                 }
             }
             messages.add(mMessage);

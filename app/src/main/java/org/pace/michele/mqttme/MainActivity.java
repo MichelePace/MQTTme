@@ -429,8 +429,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param key
      */
-    void togglePressed(int key, boolean isChecked){
-
+    void togglePressed(final int key, boolean isChecked){
         if(mBound){
             if(mService.isConnected()) {
 
@@ -447,6 +446,20 @@ public class MainActivity extends AppCompatActivity {
                 mService.publish(topic, payload, qos, retained);
 
             }else{
+
+                //Reset the button state
+                View mi = itemsView.get(key);
+                ToggleButton mt = (ToggleButton) mi.findViewById(R.id.toggleButton);
+                mt.setOnCheckedChangeListener(null);
+                mt.setChecked(!isChecked);
+
+                mt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        togglePressed(key, isChecked);
+                    }
+                });
+
                 Toast.makeText(getApplicationContext(), "Host not connected!", Toast.LENGTH_SHORT).show();
             }
         }else{

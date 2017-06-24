@@ -214,7 +214,7 @@ public class PushNotificationService extends Service {
      *
      */
     public boolean isConnected(){
-        return settings.connected;
+        return client.isConnected();
     }
 
     @Override

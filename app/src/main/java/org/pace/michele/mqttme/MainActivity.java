@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     File fileNotifications;
     final String path = "/itemStatus";
     final String pathSettings = "/settingStatus";
-    final String pathNotifications = "notificationStatus";
+    final String pathNotifications = "/notificationStatus";
 
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
@@ -75,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
     ServiceConnection mConnection;
     PushNotificationService mService;
+
+    boolean bootstrap;
 
     //Flags
     boolean initialized = false;  //Indicates if layout has been initialized
@@ -104,31 +106,25 @@ public class MainActivity extends AppCompatActivity {
                 TextView range = (TextView) d.findViewById(R.id.rangeItem);
                 TextView toggle = (TextView) d.findViewById(R.id.toggleItem);
 
-                text.setOnClickListener(new View.OnClickListener()
-                {
+                text.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v)
-                    {
+                    public void onClick(View v) {
                         addItem(MyItem.TEXT_ITEM);
                         d.dismiss();
                     }
                 });
 
-                range.setOnClickListener(new View.OnClickListener()
-                {
+                range.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v)
-                    {
+                    public void onClick(View v) {
                         addItem(MyItem.RANGE_ITEM);
                         d.dismiss();
                     }
                 });
 
-                toggle.setOnClickListener(new View.OnClickListener()
-                {
+                toggle.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(View v)
-                    {
+                    public void onClick(View v) {
                         addItem(MyItem.TOGGLE_ITEM);
                         d.dismiss();
                     }
@@ -145,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         column.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                if(!initialized) {
+                if (!initialized) {
                     initialize();
                 }
             }
@@ -196,7 +192,6 @@ public class MainActivity extends AppCompatActivity {
                     mBound = true;
 
                     mService.setMainActivity(MainActivity.this);
-                    mService.setNotifications(notifications);
 
                     Vector<MyMessage> messages = mService.getMessages();
                     MyMessage mMessage;
@@ -288,6 +283,9 @@ public class MainActivity extends AppCompatActivity {
                     Snackbar.make(new View(this), "Something goes wrong...", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
+
+                saveOnFile();
+
                 break;
             }
 
@@ -892,6 +890,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         totalItems++;
+
+        saveOnFile();
     }
 
 
@@ -1017,6 +1017,8 @@ public class MainActivity extends AppCompatActivity {
         myIntent.putExtra("Key", key);
         myIntent.putExtra("ItemID", item.getType());
         MainActivity.this.startActivityForResult(myIntent, MODIFY_ITEM);
+
+        saveOnFile();
     }
 
 
@@ -1074,6 +1076,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         totalItems--;
+
+        saveOnFile();
     }
 
 
@@ -1084,6 +1088,26 @@ public class MainActivity extends AppCompatActivity {
     void duplicateItem(int key){
         MyItem mi=items.get(key);
         createNewItem(mi);
+
+    }
+
+
+    /**
+     *
+     */
+    void saveOnFile(){
+        file = new File(this.getFilesDir() + path);
+        try {
+            FileOutputStream output= new FileOutputStream(file);
+            ObjectOutputStream out = new ObjectOutputStream(output);
+            out.writeObject(items);
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -1106,18 +1130,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop(){
         super.onStop();
-        file = new File(this.getFilesDir() + path);
-        try {
-            FileOutputStream output= new FileOutputStream(file);
-            ObjectOutputStream out = new ObjectOutputStream(output);
-            out.writeObject(items);
-            out.flush();
-            out.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         main_activity_running = false;
     }
 

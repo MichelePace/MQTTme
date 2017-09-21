@@ -53,8 +53,8 @@ public class PushNotificationService extends Service {
     private File fileLastMessages;
     private final String path = "/itemStatus";
     private final String pathSettings = "/settingStatus";
-    private final String pathNotifications = "notificationStatus";
-    private final String pathLastMessages = "lastMessages";
+    private final String pathNotifications = "/notificationStatus";
+    private final String pathLastMessages = "/lastMessages";
 
     Hashtable<Integer, MyItem> items = new Hashtable<Integer, MyItem>();
     Hashtable<String, MyNotification> notifications = new Hashtable<String, MyNotification>();
@@ -371,7 +371,6 @@ public class PushNotificationService extends Service {
                             }
                         }
 
-
                         settings.connected = true;
 
                         Log.v(TAG, " +++ Subscribed");
@@ -425,15 +424,6 @@ public class PushNotificationService extends Service {
                 boolean ok_notify = true;
 
                 if(notifications.get(topic).getNotify() && notifications.get(topic).getType() == MyNotification.NOTIFICATION) {
-
-                    int pp = lastMessages.size();
-                    String p = ""+pp;
-
-                    try {
-                        client.publish("/debug", p.getBytes(), 1, true);
-                    } catch (MqttException e) {
-                        e.printStackTrace();
-                    }
 
                     if(notifications.get(topic).getNotShowSame()) {
 

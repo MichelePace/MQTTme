@@ -3,12 +3,14 @@
     package="org.pace.michele.mqttme">
 
     <!-- Permissions the Application Requires -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="com.google.android.gcm.permission.C2D_MESSAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
-
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -36,14 +38,14 @@
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
         <activity
-            android:excludeFromRecents="true"
             android:name=".ItemParametersActivity"
+            android:excludeFromRecents="true"
             android:label="@string/title_activity_item_parameters"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:excludeFromRecents="true"
             android:name=".SettingConnectionActivity"
+            android:excludeFromRecents="true"
             android:label="@string/title_activity_setting_connection"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -54,17 +56,29 @@
             android:exported="true" />
 
         <activity
-            android:excludeFromRecents="true"
             android:name=".NotificationSettingsActivity"
+            android:excludeFromRecents="true"
             android:label="@string/title_activity_notification_settings"
             android:theme="@style/AppTheme.NoActionBar" />
-
         <activity
             android:name=".AlarmActivity"
-            android:excludeFromRecents="true"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
             android:label="@string/title_activity_alarm"
-            android:theme="@style/FullscreenTheme"></activity>
+            android:theme="@style/FullscreenTheme" />
+
+        <receiver
+            android:name=".MyBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

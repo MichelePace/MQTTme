@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class SettingConnectionActivity extends AppCompatActivity {
 
@@ -43,15 +44,47 @@ public class SettingConnectionActivity extends AppCompatActivity {
 
     void saveAndFinish()
     {
-        settings.setAddress(((EditText)findViewById(R.id.edit_address)).getText().toString());
-        settings.setport(Integer.parseInt(((EditText)findViewById(R.id.edit_port)).getText().toString()));
-        settings.setUsername(((EditText)findViewById(R.id.edit_username)).getText().toString());
-        settings.setPassword(((EditText)findViewById(R.id.edit_password)).getText().toString());
-        settings.setClientId(((EditText)findViewById(R.id.edit_clientID)).getText().toString());
-        Intent resultIntent = new Intent();
-        resultIntent.putExtra("Connection", settings);
-        setResult(RESULT_OK, resultIntent);
-        finish();
+        boolean server = false;
+        boolean port = false;
+
+        if(((EditText)findViewById(R.id.edit_address)).getText().toString().isEmpty()){
+            Toast.makeText(getApplicationContext(), "You must set a server address", Toast.LENGTH_SHORT).show();
+        }else{
+            settings.setAddress(((EditText)findViewById(R.id.edit_address)).getText().toString());
+            server = true;
+        }
+
+        if(((EditText)findViewById(R.id.edit_port)).getText().toString().isEmpty()){
+            Toast.makeText(getApplicationContext(), "You must set a server port", Toast.LENGTH_SHORT).show();
+        }else{
+            settings.setport(Integer.parseInt(((EditText)findViewById(R.id.edit_port)).getText().toString()));
+            port = true;
+        }
+
+        if(((EditText)findViewById(R.id.edit_username)).getText().toString().isEmpty()){
+            settings.setUsername("");
+        }else{
+            settings.setUsername(((EditText)findViewById(R.id.edit_username)).getText().toString());
+        }
+
+        if(((EditText)findViewById(R.id.edit_password)).getText().toString().isEmpty()){
+            settings.setPassword("");
+        }else{
+            settings.setPassword(((EditText)findViewById(R.id.edit_password)).getText().toString());
+        }
+
+        if(((EditText)findViewById(R.id.edit_clientID)).getText().toString().isEmpty()){
+            settings.setClientId("mqttme-3333333");
+        }else{
+            settings.setClientId(((EditText)findViewById(R.id.edit_clientID)).getText().toString());
+        }
+
+        if(server && port) {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("Connection", settings);
+            setResult(RESULT_OK, resultIntent);
+            finish();
+        }
     }
 
     void showOldSettings(){
